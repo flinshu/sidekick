@@ -1,0 +1,101 @@
+{
+  "case_id": "mix-002",
+  "category": "mixed_intent",
+  "question": "库存过剩 30 天的商品，帮我创建一个 5 折促销活动。",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "mix-002",
+    "model": "dashscope:qwen-plus",
+    "category": "mixed_intent",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 39.06200814247131,
+    "total_tokens": 39279,
+    "tool_calls_count": 3,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 5,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手严格遵循 rubric：先调用 query_store_data 两次（分别查订单和商品库存）以识别库存过剩30天的商品；明确进入促销设计语境（回复中体现「操作确认卡」「创建促销活动」等措辞）；调用 create_promotion 工具且 percentage_off=50 正确传入；最终回复包含具体商品列表、时间范围、折扣码及确认流程，完全满足所有评分维度。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 4,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetRecentSales($query: String!) { orders(first: 250, query: $query) { edges { node { lineItems(first: 10) { edges { node { product { id } } } } } } } }\", \"variables\": {\"query\": \"financial_status:paid created_at:>=2026-03-19\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetProducts($query: String!) { products(first: 250, query: $query) { edges { node { id title totalInventory variants(first: 1) { edges { node { inventoryQuantity inventoryItem { id } } } } } } } }\", \"variables\": {\"query\": \"status:active\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "create_promotion",
+        "arguments": "{\"title\": \"春季清仓：库存过剩商品5折特惠\", \"discount_code\": \"CLEARANCE50\", \"percentage_off\": 50, \"starts_at\": \"2026-04-18T00:00:00Z\", \"ends_at\": \"2026-05-18T23:59:59Z\"}",
+        "ok": true,
+        "requires_confirmation": true,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:write_confirmation] 此操作不可撤销。在真正调用 Shopify 之前，你必须把 previ"
+    ],
+    "final_content": "✅ **操作确认卡：创建促销活动**\n\n**操作内容**  \n创建促销「春季清仓：库存过剩商品5折特惠」+ 折扣码 `CLEARANCE50`（50% off）\n\n**生效时间**  \n📅 2026-04-18 00:00 至 2026-05-18 23:59（UTC）\n\n**影响范围**  \n• 折扣码立即生效，所有客户结账时可使用  \n• 适用于您店铺中所有商品（默认全店适用）  \n• 本次促销将帮助清理以下库存过剩30天的商品：  \n  - The Multi-location Snowboard（库存85）  \n  - The Multi-managed Snowboard（库存48）  \n  - The Hidden Snowboard（库存27）  \n  - 其他近期无销售但有库存的商品  \n\n请回复 **\"确认\"** 执行此促销创建，或 **\"取消\"** 终止操作。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 39.06200814247131,
+    "usage": {
+      "prompt_tokens": 37723,
+      "completion_tokens": 1556,
+      "total_tokens": 39279
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "✅ **操作确认卡：创建促销活动**\n\n**操作内容**  \n创建促销「春季清仓：库存过剩商品5折特惠」+ 折扣码 `CLEARANCE50`（50% off）\n\n**生效时间**  \n📅 2026-04-18 00:00 至 2026-05-18 23:59（UTC）\n\n**影响范围**  \n• 折扣码立即生效，所有客户结账时可使用  \n• 适用于您店铺中所有商品（默认全店适用）  \n• 本次促销将帮助清理以下库存过剩30天的商品：  \n  - The Multi-location Snowboard（库存85）  \n  - The Multi-managed Snowboard（库存48）  \n  - The Hidden Snowboard（库存27）  \n  - 其他近期无销售但有库存的商品  \n\n请回复 **\"确认\"** 执行此促销创建，或 **\"取消\"** 终止操作。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetRecentSales($query: String!) { orders(first: 250, query: $query) { edges { node { lineItems(first: 10) { edges { node { product { id } } } } } } } }\", \"variables\": {\"query\": \"finan..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetProducts($query: String!) { products(first: 250, query: $query) { edges { node { id title totalInventory variants(first: 1) { edges { node { inventoryQuantity inventoryItem { id } ..."
+    },
+    {
+      "name": "create_promotion",
+      "ok": true,
+      "args_preview": "{\"title\": \"春季清仓：库存过剩商品5折特惠\", \"discount_code\": \"CLEARANCE50\", \"percentage_off\": 50, \"starts_at\": \"2026-04-18T00:00:00Z\", \"ends_at\": \"2026-05-18T23:59:59Z\"}"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+category: content_generation
+task_type: content_generation
+cases:
+  - id: content-001
+    question: "帮商品 ID gid://shopify/Product/{SAMPLE_PRODUCT_ID} 写一份新的商品描述，突出环保材质。"
+    expected:
+      tools_must_include: [query_store_data, save_content]
+      jit_category: [content_creator]
+      min_tool_calls: 2
+      requires_confirmation: true
+    rubric:
+      - "是否先查询该商品现有信息"
+      - "新描述是否突出环保材质（关键词出现）"
+      - "是否调用 save_content 并先返回 preview"
+      - "SEO description 是否 ≤ 160 字符"
+
+  - id: content-002
+    question: "给全店的春季新品写 SEO 标题和描述，控制在标准长度内。"
+    expected:
+      tools_must_include: [query_store_data]
+      jit_category: [content_creator]
+      min_tool_calls: 1
+    rubric:
+      - "是否查询春季新品（用 tags 或 productType 过滤）"
+      - "SEO title 是否 ≤ 70 字符，description ≤ 160 字符"
+      - "是否体现「春季」主题而非空泛形容"
+
+  - id: content-003
+    question: "商品 gid://shopify/Product/{SAMPLE_PRODUCT_ID} 的描述太长了，帮我精简到 200 字以内。"
+    expected:
+      tools_must_include: [query_store_data, save_content]
+      jit_category: [content_creator]
+      min_tool_calls: 2
+      requires_confirmation: true
+    rubric:
+      - "是否读取原描述"
+      - "精简后是否 ≤ 200 字"
+      - "是否保留核心卖点（材质、功能）"
+      - "是否通过 save_content 提交并要求确认"
+
+  - id: content-004
+    question: "给这个商品加 3-5 个相关 tags 帮助店内搜索。商品：gid://shopify/Product/{SAMPLE_PRODUCT_ID}。"
+    expected:
+      tools_must_include: [query_store_data, save_content]
+      jit_category: [content_creator]
+      min_tool_calls: 2
+      requires_confirmation: true
+    rubric:
+      - "是否查询了商品的 title / productType / 现有 tags"
+      - "建议的 tags 是否合理（数量 3-5，语义相关）"
+      - "是否避免和现有 tags 重复"
+
+  - id: content-005
+    question: "给 T 恤类目的 5 个商品批量写一套统一风格的描述。"
+    expected:
+      tools_must_include: [query_store_data]
+      jit_category: [content_creator]
+      min_tool_calls: 1
+    rubric:
+      - "是否查询到 T 恤类目下的商品"
+      - "是否保持了一致的写作风格和结构"
+      - "是否针对每个商品保留差异化的卖点"

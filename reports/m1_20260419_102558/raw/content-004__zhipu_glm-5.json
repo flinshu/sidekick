@@ -1,0 +1,88 @@
+{
+  "case_id": "content-004",
+  "category": "content_generation",
+  "question": "给这个商品加 3-5 个相关 tags 帮助店内搜索。商品：gid://shopify/Product/10373911838904。",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "content-004",
+    "model": "zhipu:glm-5",
+    "category": "content_generation",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 38.8846378326416,
+    "total_tokens": 18562,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 3,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用了 query_store_data 查询商品 title、productType 和 tags（确认当前 tags 为空），并生成了 5 个新 tags，符合数量要求。但 'snowboard' 与商品 'Gift Card' 语义无关，明显不相关，违反 'tags 是否合理（语义相关）' 要求；同时未显式说明已检查并避免重复（虽当前无 tags，但 rubric 要求该逻辑必须体现），属于关键缺陷。"
+  },
+  "trace": {
+    "task_type": "content_generation",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  product(id: \\\"gid://shopify/Product/10373911838904\\\") {\\n    id\\n    title\\n    productType\\n    vendor\\n    description\\n    tags\\n    seo {\\n      title\\n      description\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "save_content",
+        "arguments": "{\"product_id\":\"gid://shopify/Product/10373911838904\",\"tags\":[\"gift\", \"gift-card\", \"present\", \"voucher\", \"snowboard\"]}",
+        "ok": true,
+        "requires_confirmation": true,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1",
+      "[JIT:write_confirmation] 此操作不可撤销。在真正调用 Shopify 之前，你必须把 previ"
+    ],
+    "final_content": "---\n\n## 📋 操作确认卡\n\n| 项目 | 内容 |\n|------|------|\n| **商品** | Gift Card |\n| **操作** | 添加 tags |\n| **当前 tags** | *(无)* |\n| **新增 tags** | `gift` `gift-card` `present` `voucher` `snowboard` |\n| **影响** | 修改后立即对买家可见 |\n\n---\n\n请确认是否执行？回复 **\"确认\"** 继续，或 **\"取消\"** 放弃。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 38.8846378326416,
+    "usage": {
+      "prompt_tokens": 17806,
+      "completion_tokens": 756,
+      "total_tokens": 18562
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "---\n\n## 📋 操作确认卡\n\n| 项目 | 内容 |\n|------|------|\n| **商品** | Gift Card |\n| **操作** | 添加 tags |\n| **当前 tags** | *(无)* |\n| **新增 tags** | `gift` `gift-card` `present` `voucher` `snowboard` |\n| **影响** | 修改后立即对买家可见 |\n\n---\n\n请确认是否执行？回复 **\"确认\"** 继续，或 **\"取消\"** 放弃。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  product(id: \\\"gid://shopify/Product/10373911838904\\\") {\\n    id\\n    title\\n    productType\\n    vendor\\n    description\\n    tags\\n    seo {\\n      title\\n      description\\n    }\\n  }..."
+    },
+    {
+      "name": "save_content",
+      "ok": true,
+      "args_preview": "{\"product_id\":\"gid://shopify/Product/10373911838904\",\"tags\":[\"gift\", \"gift-card\", \"present\", \"voucher\", \"snowboard\"]}"
+    }
+  ]
+}

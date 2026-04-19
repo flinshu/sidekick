@@ -1,0 +1,64 @@
+# M1 销售分析类测试用例 × 5
+# 每条包含：question / expected / rubric / task_type
+# expected.tools_must_include: 必须调用到的工具（Agent 必须选对）
+# expected.jit_category: 工具返回里预期出现的 JIT 场景标签
+# rubric: 人工 + LLM-as-Judge 使用的评分维度
+category: sales_analytics
+task_type: analysis
+cases:
+  - id: sales-001
+    question: "上周订单数和总销售额是多少？"
+    expected:
+      tools_must_include: [query_store_data]
+      jit_category: [analytics_sales]
+      min_tool_calls: 1
+    rubric:
+      - "是否调用 query_store_data 且查询了 orders 的 totalPrice / createdAt 字段"
+      - "是否正确框定「上周」时间范围（query 参数用 created_at 过滤）"
+      - "最终回复是否给出订单数与销售额两个数字"
+
+  - id: sales-002
+    question: "哪些商品本月销量最高？给我前 5 个。"
+    expected:
+      tools_must_include: [query_store_data]
+      jit_category: [analytics_sales]
+      min_tool_calls: 1
+    rubric:
+      - "是否查询 orders 并关联 lineItems → product / variant"
+      - "是否真的做了 Top 5 聚合（数量或销售额）"
+      - "输出是否是有序 Top 5 清单"
+
+  - id: sales-003
+    question: "对比本周和上周的销售表现，有哪些值得注意的变化？"
+    expected:
+      tools_must_include: [query_store_data]
+      jit_category: [analytics_sales]
+      min_tool_calls: 1
+    rubric:
+      - "是否查了两个时间段的数据（两次或一次按 created_at 过滤）"
+      - "是否计算环比百分比"
+      - "是否标注涨跌超 10% 的维度（按 JIT 指令要求）"
+      - "如果样本不足是否明确说明"
+
+  - id: sales-004
+    question: "本月哪些客户花得最多？列出 Top 3。"
+    expected:
+      tools_must_include: [query_store_data]
+      jit_category: [customer_insights, analytics_sales]
+      min_tool_calls: 1
+    rubric:
+      - "是否查询 orders 并带 customer { id } 字段（为客户端聚合准备数据）"
+      - "是否按 customer.id 分组对 totalPrice 求和（客户端聚合，Shopify GraphQL 无 group by）"
+      - "是否正确输出 Top 3 按总消费降序"
+      - "是否对客户 PII 做了合理脱敏或聚合呈现（email 可截断，firstName 可保留）"
+
+  - id: sales-005
+    question: "最近 7 天退款或取消的订单有哪些？可能什么原因？"
+    expected:
+      tools_must_include: [query_store_data]
+      jit_category: [analytics_sales]
+      min_tool_calls: 1
+    rubric:
+      - "是否过滤 cancelledAt 或 financialStatus=REFUNDED"
+      - "是否尝试结合 cancelReason 给出可能原因"
+      - "回复是否按商品 / 客户等维度做了归纳而不是原始列表堆砌"

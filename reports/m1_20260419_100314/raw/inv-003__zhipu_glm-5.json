@@ -1,0 +1,86 @@
+{
+  "case_id": "inv-003",
+  "category": "inventory_ops",
+  "question": "库存里有哪些积压 30 天以上没卖动的商品？",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "inv-003",
+    "model": "zhipu:glm-5",
+    "category": "inventory_ops",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 45.06961679458618,
+    "total_tokens": 17998,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 5,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手准确结合库存（total_inventory > 0）与近30天订单数据（created_at >= 2026-03-20, paid）识别零销售积压商品，满足‘结合库存+订单识别长期积压’；明确给出下架/促销建议（如‘促销清仓或下架’‘打折测试’），满足第二条；通过‘⚠️ 积压严重/明显’及不同折扣力度、处置优先级区分严重程度，并隐含品类一致性（均为 snowboard），满足第三条。回复结构清晰、可操作性强，无冗余或遗漏。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 2,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  products(first: 250, query: \\\"total_inventory:>0\\\") {\\n    edges {\\n      node {\\n        id\\n        title\\n        totalInventory\\n        updatedAt\\n        vendor\\n        productType\\n        variants(first: 10) {\\n          edges {\\n            node {\\n              id\\n              sku\\n              inventoryQuantity\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-03-20 financial_status:paid\\\") {\\n    edges {\\n      node {\\n        lineItems(first: 50) {\\n          edges {\\n            node {\\n              product {\\n                id\\n              }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "## 📦 积压 30 天以上商品清单\n\n经过对比「当前有库存商品」与「近 30 天已支付订单」，发现以下商品**有库存但零销售**：\n\n| 商品名称 | 库存数量 | 类型 | 建议 |\n|---------|---------|------|------|\n| **The Archived Snowboard** | 50 件 | snowboard | ⚠️ 积压严重，建议促销清仓或下架 |\n| **The Draft Snowboard** | 20 件 | snowboard | ⚠️ 积压明显，建议打折促销 |\n\n---\n\n### 💡 运营建议\n\n1. **The Archived Snowboard（50件）**\n   - 库存价值较高，建议创建 **20-30% 折扣码** 促销清仓\n   - 或考虑捆绑热销商品（如 The Videographer Snowboard）做组合优惠\n\n2. **The Draft Snowboard（20件）**\n   - 可先尝试 **15% 折扣** 测试市场反应\n   - 若仍无起色，考虑季节性清仓或转线下渠道\n\n---\n\n需要我帮你创建促销折扣码吗？或者你想先看看这些商品的详细页面信息？",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 45.06961679458618,
+    "usage": {
+      "prompt_tokens": 16446,
+      "completion_tokens": 1552,
+      "total_tokens": 17998
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "## 📦 积压 30 天以上商品清单\n\n经过对比「当前有库存商品」与「近 30 天已支付订单」，发现以下商品**有库存但零销售**：\n\n| 商品名称 | 库存数量 | 类型 | 建议 |\n|---------|---------|------|------|\n| **The Archived Snowboard** | 50 件 | snowboard | ⚠️ 积压严重，建议促销清仓或下架 |\n| **The Draft Snowboard** | 20 件 | snowboard | ⚠️ 积压明显，建议打折促销 |\n\n---\n\n### 💡 运营建议\n\n1. **The Archived Snowboard（50件）**\n   - 库存价值较高，建议创建 **20-30% 折扣码** 促销清仓\n   - 或考虑捆绑热销商品（如 The Videographer Snowboard）做组合优惠\n\n2. **The Draft Snowboard（20件）**\n   - 可先尝试 **15% 折扣** 测试市场反应\n   - 若仍无起色，考虑季节性清仓或转线下渠道\n\n---\n\n需要我帮你创建促销折扣码吗？或者你想先看看这些商品的详细页面信息？",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  products(first: 250, query: \\\"total_inventory:>0\\\") {\\n    edges {\\n      node {\\n        id\\n        title\\n        totalInventory\\n        updatedAt\\n        vendor\\n        productTy..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-03-20 financial_status:paid\\\") {\\n    edges {\\n      node {\\n        lineItems(first: 50) {\\n          edges {\\n            node {\\n       ..."
+    }
+  ]
+}

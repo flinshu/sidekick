@@ -1,0 +1,74 @@
+{
+  "case_id": "sales-005",
+  "category": "sales_analytics",
+  "question": "最近 7 天退款或取消的订单有哪些？可能什么原因？",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "sales-005",
+    "model": "dashscope:qwen-plus",
+    "category": "sales_analytics",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 13.097738981246948,
+    "total_tokens": 12394,
+    "tool_calls_count": 1,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 4,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用 query_store_data 工具并使用了包含 cancelledAt 或 financialStatus=REFUNDED 的过滤逻辑（虽未展示完整 query 字符串，但工具调用上下文和结果‘无退款/取消订单’表明已按 rubric 过滤）；虽未直接展示 cancelReason（因无数据），但主动说明‘无数据’并合理推断健康履约的可能原因，符合‘结合 cancelReason 给出可能原因’的精神；回复未堆砌原始订单列表，而是归纳为整体趋势并从运营维度（发货、描述、客服、促销）归因，满足归纳性要求；唯一小瑕疵是未显式提及 cancelReason 字段——但因查询结果为空，该字段自然不可用，故不构成实质性缺陷。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 2,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetRecentRefundedCancelledOrders($query: String!) { orders(first: 50, query: $query, sortKey: CREATED_AT, reverse: true) { edges { node { id name createdAt updatedAt processedAt cancelledAt cancelReason displayFinancialStatus displayFulfillmentStatus totalPrice totalDiscounts totalTax customer { id firstName lastName email } lineItems(first: 10) { edges { node { name quantity sku variant { title } product { title } } } } note tags } } } }\", \"variables\": {\"query\": \"financial_status:refunded OR financial_status:partially_refunded OR financial_status:voided OR status:cancelled created_at:>=2026-04-12 created_at:<2026-04-20\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "查询结果显示：最近7天（2026-04-12至2026-04-19）**没有找到任何退款或取消的订单**。\n\n这说明您的店铺近期订单履约情况非常健康，客户满意度较高，没有出现批量退款或取消的情况。\n\n可能的原因包括：\n- 订单处理及时，发货准确率高\n- 商品描述与实物一致，减少买家预期落差\n- 客户服务响应迅速，问题在升级为退款前已解决\n- 当前没有进行可能导致退货的促销活动（如清仓、试用装等）\n\n如果您需要进一步分析其他维度（比如特定商品的退货率、客户反馈原因等），或者想查看更长时间范围的数据，请告诉我，我可以为您调整查询条件。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 13.097738981246948,
+    "usage": {
+      "prompt_tokens": 11954,
+      "completion_tokens": 440,
+      "total_tokens": 12394
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "查询结果显示：最近7天（2026-04-12至2026-04-19）**没有找到任何退款或取消的订单**。\n\n这说明您的店铺近期订单履约情况非常健康，客户满意度较高，没有出现批量退款或取消的情况。\n\n可能的原因包括：\n- 订单处理及时，发货准确率高\n- 商品描述与实物一致，减少买家预期落差\n- 客户服务响应迅速，问题在升级为退款前已解决\n- 当前没有进行可能导致退货的促销活动（如清仓、试用装等）\n\n如果您需要进一步分析其他维度（比如特定商品的退货率、客户反馈原因等），或者想查看更长时间范围的数据，请告诉我，我可以为您调整查询条件。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetRecentRefundedCancelledOrders($query: String!) { orders(first: 50, query: $query, sortKey: CREATED_AT, reverse: true) { edges { node { id name createdAt updatedAt processedAt cance..."
+    }
+  ]
+}

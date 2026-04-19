@@ -1,0 +1,90 @@
+{
+  "case_id": "content-001",
+  "category": "content_generation",
+  "question": "帮商品 ID gid://shopify/Product/{SAMPLE_PRODUCT_ID} 写一份新的商品描述，突出环保材质。",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "content-001",
+    "model": "zhipu:glm-5",
+    "category": "content_generation",
+    "tool_selection_accuracy": false,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": false,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 27.990140914916992,
+    "total_tokens": 18060,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [
+      "缺失工具：['save_content']，实际调用：['query_store_data', 'query_store_data']",
+      "期望触发写操作但实际未调用任何写工具"
+    ],
+    "hard_pass": false
+  },
+  "judge": {
+    "overall": 2,
+    "tool_selection_correct": false,
+    "jit_instruction_followed": false,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手未正确调用 query_store_data 查询指定商品 ID 的信息，而是错误地查询了最新 10 个商品列表（且未传入 $id 变量），违反 '是否先查询该商品现有信息' 要求；未生成任何商品描述，因此未突出环保材质关键词；未调用 save_content 或返回 preview；未生成 SEO description，更无法验证 ≤ 160 字符。所有 rubric 条目均未满足，仅提供泛化列表并要求用户二次选择，属严重流程偏离。"
+  },
+  "trace": {
+    "task_type": "content_generation",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"query getProduct($id: ID!) {\\n  product(id: $id) {\\n    id\\n    title\\n    descriptionHtml\\n    productType\\n    vendor\\n    tags\\n    seo {\\n      title\\n      description\\n    }\\n    featuredImage {\\n      url\\n      altText\\n    }\\n    variants(first: 5) {\\n      edges {\\n        node {\\n          id\\n          title\\n          price\\n          sku\\n        }\\n      }\\n    }\\n  }\\n}\",\"variables\":{\"id\": \"gid://shopify/Product/{SAMPLE_PRODUCT_ID}\"}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors: Variable $id of type ID! was provided invalid value"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  products(first: 10, sortKey: UPDATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        vendor\\n        status\\n        totalInventory\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1",
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1"
+    ],
+    "final_content": "您提供的商品 ID 是占位符。以下是您店铺中的商品列表，请告诉我您要为哪个商品撰写环保材质描述：\n\n| # | 商品名称 | 类型 | 供应商 | 库存 |\n|---|---------|------|--------|------|\n| 1 | The Collection Snowboard: Hydrogen | snowboard | Hydrogen Vendor | 16 |\n| 2 | The Collection Snowboard: Liquid | snowboard | Hydrogen Vendor | 13 |\n| 3 | The Complete Snowboard | snowboard | Snowboard Vendor | -78 |\n| 4 | The Minimal Snowboard | - | sp01 | 15 |\n| 5 | The Multi-location Snowboard | snowboard | sp01 | 85 |\n| 6 | The Videographer Snowboard | snowboard | sp01 | 11 |\n| 7 | Gift Card | giftcard | Snowboard Vendor | - |\n| 8 | Selling Plans Ski Wax | accessories | sp01 | - |\n| 9 | The Inventory Not Tracked Snowboard | snowboard | sp01 | 0 |\n| 10 | The Collection Snowboard: Oxygen | snowboard | Hydrogen Vendor | 29 |\n\n请回复商品名称或编号，我会为您撰写突出环保材质的商品描述。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 27.990140914916992,
+    "usage": {
+      "prompt_tokens": 17241,
+      "completion_tokens": 819,
+      "total_tokens": 18060
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "您提供的商品 ID 是占位符。以下是您店铺中的商品列表，请告诉我您要为哪个商品撰写环保材质描述：\n\n| # | 商品名称 | 类型 | 供应商 | 库存 |\n|---|---------|------|--------|------|\n| 1 | The Collection Snowboard: Hydrogen | snowboard | Hydrogen Vendor | 16 |\n| 2 | The Collection Snowboard: Liquid | snowboard | Hydrogen Vendor | 13 |\n| 3 | The Complete Snowboard | snowboard | Snowboard Vendor | -78 |\n| 4 | The Minimal Snowboard | - | sp01 | 15 |\n| 5 | The Multi-location Snowboard | snowboard | sp01 | 85 |\n| 6 | The Videographer Snowboard | snowboard | sp01 | 11 |\n| 7 | Gift Card | giftcard | Snowboard Vendor | - |\n| 8 | Selling Plans Ski Wax | accessories | sp01 | - |\n| 9 | The Inventory Not Tracked Snowboard | snowboard | sp01 | 0 |\n| 10 | The Collection Snowboard: Oxygen | snowboard | Hydrogen Vendor | 29 |\n\n请回复商品名称或编号，我会为您撰写突出环保材质的商品描述。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\":\"query getProduct($id: ID!) {\\n  product(id: $id) {\\n    id\\n    title\\n    descriptionHtml\\n    productType\\n    vendor\\n    tags\\n    seo {\\n      title\\n      description\\n    }\\n    featu..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  products(first: 10, sortKey: UPDATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        vendor\\n        status\\n        totalInvent..."
+    }
+  ]
+}

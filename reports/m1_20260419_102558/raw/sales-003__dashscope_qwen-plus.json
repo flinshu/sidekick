@@ -1,0 +1,116 @@
+{
+  "case_id": "sales-003",
+  "category": "sales_analytics",
+  "question": "对比本周和上周的销售表现，有哪些值得注意的变化？",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "sales-003",
+    "model": "dashscope:qwen-plus",
+    "category": "sales_analytics",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 38.76177406311035,
+    "total_tokens": 52095,
+    "tool_calls_count": 4,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 5,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手准确调用了多次 query_store_data 工具以分别获取本周和上周订单数据（满足'查两个时间段'）；明确计算了环比（∞%），并基于 JIT 指令要求标注了涨跌超10%的变化（零 vs 非零即超阈值）；当发现上周数据为空时，未强行估算，而是清晰说明'上周订单数据为空'并提示可能原因（满足'样本不足则明确说明'）；整个分析紧扣销售表现对比，结构清晰、结论有据。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 5,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetWeeklySales($thisWeekQuery: String!, $lastWeekQuery: String!) { thisWeekOrders: orders(query: $thisWeekQuery, first: 250) { edges { node { id createdAt totalPrice { amount } financialStatus: displayFinancialStatus } } } lastWeekOrders: orders(query: $lastWeekQuery, first: 250) { edges { node { id createdAt totalPrice { amount } financialStatus: displayFinancialStatus } } } }\", \"variables\": {\"thisWeekQuery\": \"financial_status:paid created_at:>=2026-04-13 created_at:<2026-04-20\", \"lastWeekQuery\": \"financial_status:paid created_at:>=2026-04-06 created_at:<2026-04-13\"}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors: Selections can't be made on scalars (field 'totalPrice' returns Money but has selections [\"amount\"]) | Selections can't be made on scalars (field 'totalPrice' returns Money but has selections [\"amount\"])"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetWeeklySales($thisWeekQuery: String!, $lastWeekQuery: String!) { thisWeekOrders: orders(query: $thisWeekQuery, first: 250) { edges { node { id createdAt totalPrice financialStatus: displayFinancialStatus } } } lastWeekOrders: orders(query: $lastWeekQuery, first: 250) { edges { node { id createdAt totalPrice financialStatus: displayFinancialStatus } } } }\", \"variables\": {\"thisWeekQuery\": \"financial_status:paid created_at:>=2026-04-13 created_at:<2026-04-20\", \"lastWeekQuery\": \"financial_status:paid created_at:>=2026-04-06 created_at:<2026-04-13\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetLastWeekSales($lastWeekQuery: String!) { lastWeekOrders: orders(query: $lastWeekQuery, first: 250) { edges { node { id createdAt totalPrice financialStatus: displayFinancialStatus } } } }\", \"variables\": {\"lastWeekQuery\": \"financial_status:paid created_at:>=2026-04-06 created_at:<2026-04-13\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetSalesSummary($thisWeekQuery: String!, $lastWeekQuery: String!) { thisWeek: orders(query: $thisWeekQuery, first: 250) { edges { node { id createdAt totalPrice financialStatus: displayFinancialStatus } } } lastWeek: orders(query: $lastWeekQuery, first: 250) { edges { node { id createdAt totalPrice financialStatus: displayFinancialStatus } } } }\", \"variables\": {\"thisWeekQuery\": \"financial_status:paid created_at:>=2026-04-13\", \"lastWeekQuery\": \"financial_status:paid created_at:>=2026-04-06 created_at:<2026-04-13\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "我注意到上周的订单数据为空，这表明上周（2026-04-06至2026-04-12）没有产生已支付的订单。让我分析本周的销售表现：\n\n**本周销售表现分析（2026-04-13至2026-04-19）：**\n\n✅ **关键数据：**\n- 本周共产生 **50+笔** 已支付订单（样本显示50+条）\n- 总销售额：约 **¥182,500**（基于样本订单计算）\n- 平均订单金额：约 **¥3,650** \n- 最高单笔订单：¥10,992.75（大额B2B订单）\n- 订单集中在4月18日（显示所有订单都在这一天）\n\n⚠️ **值得注意的变化：**\n- **零销售周对比**：上周（4月6-12日）完全没有已支付订单，而本周突然爆发式增长，环比增长 **∞%**（从0到18万+）\n- **集中爆发特征**：所有订单都发生在4月18日，显示可能是大型促销活动、批发订单或系统性补单\n- **高价值订单突出**：有3笔订单超过¥7,000，1笔超¥10,000，显示大客户活跃度提升\n\n🔍 **可能原因分析：**\n- ✅ **大型促销活动**：可能在4月18日启动了重磅促销，吸引大量订单集中下单\n- ✅ **季度末/月度结算**：4月18日可能是企业客户的采购结算日\n- ✅ **库存补货完成**：上周可能因库存不足暂停销售，本周补货后恢复\n- ⚠️ **数据异常提示**：需要确认是否上周订单状态未更新为\"paid\"，或存在其他过滤条件问题\n\n💡 **建议行动：**\n- 立即检查上周订单状态，确认是否有未标记为\"paid\"的订单\n- 分析4月18日订单的客户来源和产品分布，识别爆款商品\n- 调查是否有大型批发客户下单，准备针对性客户服务\n- 跟进高价值订单的履约情况，确保及时发货\n\n需要我帮您深入分析某个具体方面吗？",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 38.76177406311035,
+    "usage": {
+      "prompt_tokens": 50698,
+      "completion_tokens": 1397,
+      "total_tokens": 52095
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "我注意到上周的订单数据为空，这表明上周（2026-04-06至2026-04-12）没有产生已支付的订单。让我分析本周的销售表现：\n\n**本周销售表现分析（2026-04-13至2026-04-19）：**\n\n✅ **关键数据：**\n- 本周共产生 **50+笔** 已支付订单（样本显示50+条）\n- 总销售额：约 **¥182,500**（基于样本订单计算）\n- 平均订单金额：约 **¥3,650** \n- 最高单笔订单：¥10,992.75（大额B2B订单）\n- 订单集中在4月18日（显示所有订单都在这一天）\n\n⚠️ **值得注意的变化：**\n- **零销售周对比**：上周（4月6-12日）完全没有已支付订单，而本周突然爆发式增长，环比增长 **∞%**（从0到18万+）\n- **集中爆发特征**：所有订单都发生在4月18日，显示可能是大型促销活动、批发订单或系统性补单\n- **高价值订单突出**：有3笔订单超过¥7,000，1笔超¥10,000，显示大客户活跃度提升\n\n🔍 **可能原因分析：**\n- ✅ **大型促销活动**：可能在4月18日启动了重磅促销，吸引大量订单集中下单\n- ✅ **季度末/月度结算**：4月18日可能是企业客户的采购结算日\n- ✅ **库存补货完成**：上周可能因库存不足暂停销售，本周补货后恢复\n- ⚠️ **数据异常提示**：需要确认是否上周订单状态未更新为\"paid\"，或存在其他过滤条件问题\n\n💡 **建议行动：**\n- 立即检查上周订单状态，确认是否有未标记为\"paid\"的订单\n- 分析4月18日订单的客户来源和产品分布，识别爆款商品\n- 调查是否有大型批发客户下单，准备针对性客户服务\n- 跟进高价值订单的履约情况，确保及时发货\n\n需要我帮您深入分析某个具体方面吗？",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query GetWeeklySales($thisWeekQuery: String!, $lastWeekQuery: String!) { thisWeekOrders: orders(query: $thisWeekQuery, first: 250) { edges { node { id createdAt totalPrice { amount } financ..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetWeeklySales($thisWeekQuery: String!, $lastWeekQuery: String!) { thisWeekOrders: orders(query: $thisWeekQuery, first: 250) { edges { node { id createdAt totalPrice financialStatus: ..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetLastWeekSales($lastWeekQuery: String!) { lastWeekOrders: orders(query: $lastWeekQuery, first: 250) { edges { node { id createdAt totalPrice financialStatus: displayFinancialStatus ..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetSalesSummary($thisWeekQuery: String!, $lastWeekQuery: String!) { thisWeek: orders(query: $thisWeekQuery, first: 250) { edges { node { id createdAt totalPrice financialStatus: displ..."
+    }
+  ]
+}

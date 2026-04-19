@@ -1,0 +1,117 @@
+{
+  "case_id": "mix-003",
+  "category": "mixed_intent",
+  "question": "哪些客户最近 30 天没下单但之前花费超过 100 美元？给他们发个召回折扣。",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "mix-003",
+    "model": "dashscope:qwen-plus",
+    "category": "mixed_intent",
+    "tool_selection_accuracy": false,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": false,
+    "graphql_syntax_ok": false,
+    "completed": false,
+    "latency_s": 107.90451312065125,
+    "total_tokens": 41843,
+    "tool_calls_count": 4,
+    "fallback_count": 1,
+    "validation_retries": 0,
+    "notes": [
+      "缺失工具：['create_promotion']，实际调用：['query_store_data', 'query_store_data', 'query_store_data', 'query_store_data']",
+      "query_store_data 参数不是合法 JSON: {\"query\": \"query($first: Int!, $after: String) { customers(first: $first, after:",
+      "期望触发写操作但实际未调用任何写工具",
+      "未完成：error=所有模型都失败，hit_max_iterations=False"
+    ],
+    "hard_pass": false
+  },
+  "judge": null,
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 5,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query($query: String!) { orders(first: 250, query: $query) { edges { node { customer { id } } } } }\", \"variables\": {\"query\": \"financial_status:paid created_at:>=2026-03-19 created_at:<2026-04-19\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query($first: Int!) { customers(first: $first, sortKey: AMOUNT_SPENT, reverse: true) { edges { node { id email firstName lastName amountSpent { amount } } } } }\", \"variables\": {\"first\": 100}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query($first: Int!) { customers(first: $first) { edges { node { id email firstName lastName amountSpent { amount } } } } }\", \"variables\": {\"first\": 250}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query($first: Int!, $after: String) { customers(first: $first, after: $after) { edges { node { id email firstName lastName amountSpent { amount } } } } }\", \"variables\": {\"first\": 250, \"after\": \"eyJsYXN0X2lkIjoiZ2lkOi8vc2hvcGlmeS9DdXN0b21lci8xMDEyMDQzODUwNDk4NCIsImxhc3RfY3Vyc29yIjoiMTAxMjA0Mzg1MDQ5ODQifQ==\"}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "工具参数 JSON 解析失败：Expecting ',' delimiter: line 1 column 320 (char 319)"
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:customer_insights] 你现在处于「CRM 顾问」模式。处理客户数据时请：\n1) 区分高价值客户",
+      "[JIT:customer_insights] 你现在处于「CRM 顾问」模式。处理客户数据时请：\n1) 区分高价值客户"
+    ],
+    "final_content": null,
+    "fallback_events": [
+      {
+        "model_failed": "dashscope:qwen-plus",
+        "error": "litellm.BadRequestError: DashscopeException - <400> InternalError.Algo.InvalidParameter: The \"function.arguments\" parameter of the code model must be in JSON format."
+      }
+    ],
+    "validation_retries": 0,
+    "error": "所有模型都失败",
+    "latency_s": 107.90451312065125,
+    "usage": {
+      "prompt_tokens": 37380,
+      "completion_tokens": 4463,
+      "total_tokens": 41843
+    },
+    "completed": false,
+    "hit_max_iterations": false
+  },
+  "final_content": "",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query($query: String!) { orders(first: 250, query: $query) { edges { node { customer { id } } } } }\", \"variables\": {\"query\": \"financial_status:paid created_at:>=2026-03-19 created_at:<2026-..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query($first: Int!) { customers(first: $first, sortKey: AMOUNT_SPENT, reverse: true) { edges { node { id email firstName lastName amountSpent { amount } } } } }\", \"variables\": {\"first\": 100..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query($first: Int!) { customers(first: $first) { edges { node { id email firstName lastName amountSpent { amount } } } } }\", \"variables\": {\"first\": 250}}"
+    },
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query($first: Int!, $after: String) { customers(first: $first, after: $after) { edges { node { id email firstName lastName amountSpent { amount } } } } }\", \"variables\": {\"first\": 250, \"afte..."
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "case_id": "sales-001",
+  "category": "sales_analytics",
+  "question": "上周订单数和总销售额是多少？",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "sales-001",
+    "model": "dashscope:qwen-plus",
+    "category": "sales_analytics",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 24.853895902633667,
+    "total_tokens": 21502,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 5,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用了 query_store_data 工具，且查询条件精准匹配 rubric 要求：过滤 financial_status:paid 和 created_at 时间范围（2026-04-11 至 2026-04-17，即上周），并获取了 orders 的 totalPrice 字段；时间范围框定准确（含起始日、不含结束日，符合 ISO 周定义）；最终回复明确给出订单数（100 单）和总销售额（¥382,642.15）两个核心数字；JIT 分析部分虽超出基础要求，但属增值补充，未违背指令。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetLastWeekOrders($first: Int!) { orders(first: $first, query: \\\"financial_status:paid created_at:>=2026-04-11 created_at:<2026-04-18\\\") { edges { node { id totalPrice { amount currencyCode } } } pageInfo { hasNextPage } } }\", \"variables\": {\"first\": 250}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetLastWeekOrders($first: Int!) { orders(first: $first, query: \\\"financial_status:paid created_at:>=2026-04-11 created_at:<2026-04-18\\\") { edges { node { id totalPrice } } pageInfo { hasNextPage } } }\", \"variables\": {\"first\": 250}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "✅ 已成功获取上周（2026-04-11 至 2026-04-17）全部 **已支付订单** 数据（共 **100 笔**，未截断）。\n\n📊 聚合结果如下：\n\n- **订单总数**：**100 单**  \n- **总销售额**：**¥382,642.15**（按 `totalPrice` 字符串累加，单位为店铺默认货币，推测为 USD 或 CNY；若需按币种分列可补充查询）\n\n🔍 补充分析（JIT:analytics_sales 模式）：\n- 平均客单价：**¥3,826.42**（显著高于常规电商品类，提示高单价商品或 B2B 批量采购为主）\n- 最高单笔订单：**¥11,889.60**（占总额 3.1%），另有 3 单超 ¥8,000 → 可能来自大客户定制/批发订单\n- 低额订单（< ¥100）共 5 笔（含 3 笔 ¥10.00、¥24.95、¥9.95），疑似测试单或运费补差，建议核查是否需过滤\n\n⚠️ 注意：本次未拉取「前周」数据，暂无法计算环比。如需同比/环比分析（例如对比 2026-04-04~04-10），我可立即补查。\n\n需要我：\n- ✅ 导出明细 CSV？\n- 📈 补查前周数据做环比？\n- 🎯 定位高价值客户（Top 5 消费者）？\n- 🛒 分析热销商品（通过 line_items）？\n\n请告诉我下一步。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 24.853895902633667,
+    "usage": {
+      "prompt_tokens": 20581,
+      "completion_tokens": 921,
+      "total_tokens": 21502
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "✅ 已成功获取上周（2026-04-11 至 2026-04-17）全部 **已支付订单** 数据（共 **100 笔**，未截断）。\n\n📊 聚合结果如下：\n\n- **订单总数**：**100 单**  \n- **总销售额**：**¥382,642.15**（按 `totalPrice` 字符串累加，单位为店铺默认货币，推测为 USD 或 CNY；若需按币种分列可补充查询）\n\n🔍 补充分析（JIT:analytics_sales 模式）：\n- 平均客单价：**¥3,826.42**（显著高于常规电商品类，提示高单价商品或 B2B 批量采购为主）\n- 最高单笔订单：**¥11,889.60**（占总额 3.1%），另有 3 单超 ¥8,000 → 可能来自大客户定制/批发订单\n- 低额订单（< ¥100）共 5 笔（含 3 笔 ¥10.00、¥24.95、¥9.95），疑似测试单或运费补差，建议核查是否需过滤\n\n⚠️ 注意：本次未拉取「前周」数据，暂无法计算环比。如需同比/环比分析（例如对比 2026-04-04~04-10），我可立即补查。\n\n需要我：\n- ✅ 导出明细 CSV？\n- 📈 补查前周数据做环比？\n- 🎯 定位高价值客户（Top 5 消费者）？\n- 🛒 分析热销商品（通过 line_items）？\n\n请告诉我下一步。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query GetLastWeekOrders($first: Int!) { orders(first: $first, query: \\\"financial_status:paid created_at:>=2026-04-11 created_at:<2026-04-18\\\") { edges { node { id totalPrice { amount curren..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetLastWeekOrders($first: Int!) { orders(first: $first, query: \\\"financial_status:paid created_at:>=2026-04-11 created_at:<2026-04-18\\\") { edges { node { id totalPrice } } pageInfo { ..."
+    }
+  ]
+}

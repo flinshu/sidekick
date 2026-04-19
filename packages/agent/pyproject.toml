@@ -1,0 +1,19 @@
+[project]
+name = "sidekick-agent"
+version = "0.1.0"
+description = "Sidekick Agent runtime (PydanticAI + LiteLLM + JIT)"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.9",
+    "pydantic-ai>=0.0.14",
+    "litellm>=1.52",
+    "pyyaml>=6.0",
+    "sidekick-tools",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sidekick_agent"]

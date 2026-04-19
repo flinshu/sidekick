@@ -1,0 +1,87 @@
+{
+  "case_id": "mix-005",
+  "category": "mixed_intent",
+  "question": "帮我看看 T 恤类目这周的销售表现，如果销量低于 10 件就启动 8 折促销。",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "mix-005",
+    "model": "dashscope:qwen-plus",
+    "category": "mixed_intent",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 16.92336106300354,
+    "total_tokens": 22992,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 2,
+    "tool_selection_correct": false,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "工具调用错误：第一个 query_store_data 查询了 orders，但条件中使用了硬编码时间 '2026-04-12'/'2026-04-19'（明显非本周），且未按 rubric 要求关联 lineItems 过滤 productType=T恤；第二个查询仅查 products，未用于销量聚合。未执行销量统计，因此无法判断是否 <10，更未体现条件触发逻辑（既未说'无需促销'，也未调用 create_promotion）。根本未满足 rubric 中'按 productType=T恤 查询 orders + lineItems'这一核心要求。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetTShirtSalesThisWeek { orders(first: 250, query: \\\"financial_status:paid created_at:>=2026-04-12 created_at:<2026-04-19\\\") { edges { node { id name createdAt totalPrice lineItems(first: 10) { edges { node { product { productType title } quantity sku } } } } } } }\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetTShirtProducts { products(first: 10, query: \\\"product_type:T-shirt OR tag:tshirt OR title:T-shirt\\\") { edges { node { id title productType tags } } } }\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1"
+    ],
+    "final_content": "我查询了店铺中所有 product_type 为 \"T-shirt\" 或包含相关标签/标题的商品，但没有找到任何 T 恤类目的商品。\n\n这说明：\n- 店铺当前可能没有上架 T 恤类商品\n- 或者 T 恤商品使用了不同的分类方式（如 product_type 为 \"apparel\"、\"clothing\" 等）\n- 或者商品尚未创建或处于 draft/archived 状态\n\n由于无法找到 T 恤类目商品，自然也就无法统计其本周销量，因此无法判断是否需要启动 8 折促销。\n\n建议您：\n1. 检查 T 恤商品的实际 product_type 设置（可能是 \"apparel\"、\"clothing\"、\"tops\" 等）\n2. 确认商品是否已发布（status: active）\n3. 或提供具体的 T 恤商品 ID/名称，我可以帮您直接查询\n\n您希望我尝试用其他关键词搜索 T 恤商品，还是有其他特定的 T 恤商品需要分析？",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 16.92336106300354,
+    "usage": {
+      "prompt_tokens": 22453,
+      "completion_tokens": 539,
+      "total_tokens": 22992
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "我查询了店铺中所有 product_type 为 \"T-shirt\" 或包含相关标签/标题的商品，但没有找到任何 T 恤类目的商品。\n\n这说明：\n- 店铺当前可能没有上架 T 恤类商品\n- 或者 T 恤商品使用了不同的分类方式（如 product_type 为 \"apparel\"、\"clothing\" 等）\n- 或者商品尚未创建或处于 draft/archived 状态\n\n由于无法找到 T 恤类目商品，自然也就无法统计其本周销量，因此无法判断是否需要启动 8 折促销。\n\n建议您：\n1. 检查 T 恤商品的实际 product_type 设置（可能是 \"apparel\"、\"clothing\"、\"tops\" 等）\n2. 确认商品是否已发布（status: active）\n3. 或提供具体的 T 恤商品 ID/名称，我可以帮您直接查询\n\n您希望我尝试用其他关键词搜索 T 恤商品，还是有其他特定的 T 恤商品需要分析？",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetTShirtSalesThisWeek { orders(first: 250, query: \\\"financial_status:paid created_at:>=2026-04-12 created_at:<2026-04-19\\\") { edges { node { id name createdAt totalPrice lineItems(fi..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetTShirtProducts { products(first: 10, query: \\\"product_type:T-shirt OR tag:tshirt OR title:T-shirt\\\") { edges { node { id title productType tags } } } }\"}"
+    }
+  ]
+}

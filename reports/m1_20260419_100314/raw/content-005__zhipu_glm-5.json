@@ -1,0 +1,101 @@
+{
+  "case_id": "content-005",
+  "category": "content_generation",
+  "question": "给 T 恤类目的 5 个商品批量写一套统一风格的描述。",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "content-005",
+    "model": "zhipu:glm-5",
+    "category": "content_generation",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 32.19182729721069,
+    "total_tokens": 24211,
+    "tool_calls_count": 3,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 2,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手未满足 rubric 中的三个核心要求：1) 未查询到 T 恤类目商品（虽尝试了 'T恤' 和 'T-Shirt' 查询，但最终结论是‘没有’，未验证是否因标签/字段不匹配导致漏查，也未 fallback 到更鲁棒的查询如 tags 或 title 包含 'T恤'）；2) 未生成任何商品描述，因此完全缺失‘统一风格和结构’的体现；3) 更无从谈起‘针对每个商品保留差异化卖点’。回复转向替代方案属合理交互，但本质未完成原始任务。"
+  },
+  "trace": {
+    "task_type": "content_generation",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 4,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  products(first: 10, query: \\\"product_type:T恤\\\") {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        tags\\n        description\\n        descriptionHtml\\n        seo {\\n          title\\n          description\\n        }\\n        vendor\\n        priceRangeV2 {\\n          minVariantPrice {\\n            amount\\n            currencyCode\\n          }\\n        }\\n        featuredImage {\\n          url\\n          altText\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  products(first: 10, query: \\\"product_type:T-Shirt\\\") {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        tags\\n        description\\n        descriptionHtml\\n        seo {\\n          title\\n          description\\n        }\\n        vendor\\n        priceRangeV2 {\\n          minVariantPrice {\\n            amount\\n            currencyCode\\n          }\\n        }\\n        featuredImage {\\n          url\\n          altText\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  products(first: 20, sortKey: PRODUCT_TYPE) {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        tags\\n        vendor\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1",
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1",
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1"
+    ],
+    "final_content": "查了一下，你的店铺目前没有 T 恤类目的商品。现有商品主要是 **Snowboard（滑雪板）** 类目。\n\n---\n\n**你可以选择：**\n\n1. **给现有 Snowboard 商品写描述** — 我可以挑 5 个滑雪板商品，批量写一套统一风格的描述\n2. **指定其他类目** — 如果有其他你想优化的商品类型，告诉我类目名称\n3. **先创建 T 恤商品** — 在 Shopify 后台添加 T 恤商品后，我再帮你写描述\n\n---\n\n需要我继续处理哪个方向？",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 32.19182729721069,
+    "usage": {
+      "prompt_tokens": 23369,
+      "completion_tokens": 842,
+      "total_tokens": 24211
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "查了一下，你的店铺目前没有 T 恤类目的商品。现有商品主要是 **Snowboard（滑雪板）** 类目。\n\n---\n\n**你可以选择：**\n\n1. **给现有 Snowboard 商品写描述** — 我可以挑 5 个滑雪板商品，批量写一套统一风格的描述\n2. **指定其他类目** — 如果有其他你想优化的商品类型，告诉我类目名称\n3. **先创建 T 恤商品** — 在 Shopify 后台添加 T 恤商品后，我再帮你写描述\n\n---\n\n需要我继续处理哪个方向？",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  products(first: 10, query: \\\"product_type:T恤\\\") {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        tags\\n        description\\n        descriptionHtml\\..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  products(first: 10, query: \\\"product_type:T-Shirt\\\") {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        tags\\n        description\\n        description..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  products(first: 20, sortKey: PRODUCT_TYPE) {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        tags\\n        vendor\\n      }\\n    }\\n  }\\n}\"}"
+    }
+  ]
+}

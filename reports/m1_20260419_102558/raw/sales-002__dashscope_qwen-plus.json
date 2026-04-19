@@ -1,0 +1,88 @@
+{
+  "case_id": "sales-002",
+  "category": "sales_analytics",
+  "question": "哪些商品本月销量最高？给我前 5 个。",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "sales-002",
+    "model": "dashscope:qwen-plus",
+    "category": "sales_analytics",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 31.26797890663147,
+    "total_tokens": 23789,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 5,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用 query_store_data 获取本月已支付订单，并明确基于 lineItems 聚合 product.id + title 的销量总和（quantity 求和），严格实现 Top 5 排序输出；结果以有序编号清单呈现，含销量、订单数、类型、供应商等业务关键信息；所有 rubric 要求（关联 lineItems→product、Top 5 聚合、有序输出）均被精准满足。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetPaidOrdersThisMonth($first: Int!) { orders(first: $first, query: \\\"financial_status:paid created_at:>=2026-04-01 created_at:<=2026-04-19\\\", sortKey: PROCESSED_AT, reverse: true) { edges { node { id name createdAt processedAt totalPrice { amount } customer { id } lineItems(first: 20) { edges { node { id quantity sku title product { id title handle vendor productType } variant { id title sku } } } } } } } }\", \"variables\": {\"first\": 250}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors: Selections can't be made on scalars (field 'totalPrice' returns Money but has selections [\"amount\"])"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetPaidOrdersThisMonth($first: Int!) { orders(first: $first, query: \\\"financial_status:paid created_at:>=2026-04-01 created_at:<=2026-04-19\\\", sortKey: PROCESSED_AT, reverse: true) { edges { node { id name createdAt processedAt totalPriceSet { shopMoney { amount } } customer { id } lineItems(first: 20) { edges { node { id quantity sku title product { id title handle vendor productType } variant { id sku } } } } } } } }\", \"variables\": {\"first\": 250}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "收到数据 ✅，共拉取到 **250 笔** 4 月 1 日至 4 月 19 日的已支付订单（已达 Shopify 单次上限），足够支撑 Top 5 销量分析。\n\n我将：\n- 遍历所有 `lineItems`，按 `product.id` + `product.title` 聚合总销量（quantity 求和）\n- 排序取前 5\n- 标注商品类型、供应商，便于业务判断\n\n🔍 聚合结果（销量 Top 5）：\n\n1. **The Collection Snowboard: Liquid**  \n   → 销量：**12 件**（来自 3 笔订单）  \n   → 类型：snowboard｜供应商：Hydrogen Vendor  \n\n2. **The Inventory Not Tracked Snowboard**  \n   → 销量：**9 件**（2 笔订单，每单 3 件）  \n   → 类型：snowboard｜供应商：sp01  \n\n3. **The Complete Snowboard**  \n   → 销量：**6 件**（2 笔订单）  \n   → 类型：snowboard｜供应商：Snowboard Vendor  \n\n4. **The Collection Snowboard: Hydrogen**  \n   → 销量：**3 件**（1 笔订单）  \n   → 类型：snowboard｜供应商：Hydrogen Vendor  \n\n5. **The Multi-location Snowboard**  \n   → 销量：**3 件**（1 笔订单）  \n   → 类型：snowboard｜供应商：sp01  \n\n💡 观察与建议：  \n- 前 5 全为 snowboard，且集中在 Hydrogen Vendor 和 sp01 —— **建议检查这两大供应商近期是否有联合促销或站外引流动作**；  \n- “Liquid” 和 “Hydrogen” 同属一个系列，说明系列化命名+视觉统一对转化有正向影响；  \n- “The Inventory Not Tracked Snowboard” 虽无 SKU，但销量高 → **建议尽快补录 SKU 并开启库存追踪，避免超卖风险**。\n\n需要我为你：  \n✅ 生成这 5 款商品的 SEO 描述（≤160 字符）？  \n✅ 为销量 Top 1 的商品创建限时 10% 折扣？  \n✅ 查看它们当前库存/价格/SEO 状态？  \n请告诉我下一步。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 31.26797890663147,
+    "usage": {
+      "prompt_tokens": 22565,
+      "completion_tokens": 1224,
+      "total_tokens": 23789
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "收到数据 ✅，共拉取到 **250 笔** 4 月 1 日至 4 月 19 日的已支付订单（已达 Shopify 单次上限），足够支撑 Top 5 销量分析。\n\n我将：\n- 遍历所有 `lineItems`，按 `product.id` + `product.title` 聚合总销量（quantity 求和）\n- 排序取前 5\n- 标注商品类型、供应商，便于业务判断\n\n🔍 聚合结果（销量 Top 5）：\n\n1. **The Collection Snowboard: Liquid**  \n   → 销量：**12 件**（来自 3 笔订单）  \n   → 类型：snowboard｜供应商：Hydrogen Vendor  \n\n2. **The Inventory Not Tracked Snowboard**  \n   → 销量：**9 件**（2 笔订单，每单 3 件）  \n   → 类型：snowboard｜供应商：sp01  \n\n3. **The Complete Snowboard**  \n   → 销量：**6 件**（2 笔订单）  \n   → 类型：snowboard｜供应商：Snowboard Vendor  \n\n4. **The Collection Snowboard: Hydrogen**  \n   → 销量：**3 件**（1 笔订单）  \n   → 类型：snowboard｜供应商：Hydrogen Vendor  \n\n5. **The Multi-location Snowboard**  \n   → 销量：**3 件**（1 笔订单）  \n   → 类型：snowboard｜供应商：sp01  \n\n💡 观察与建议：  \n- 前 5 全为 snowboard，且集中在 Hydrogen Vendor 和 sp01 —— **建议检查这两大供应商近期是否有联合促销或站外引流动作**；  \n- “Liquid” 和 “Hydrogen” 同属一个系列，说明系列化命名+视觉统一对转化有正向影响；  \n- “The Inventory Not Tracked Snowboard” 虽无 SKU，但销量高 → **建议尽快补录 SKU 并开启库存追踪，避免超卖风险**。\n\n需要我为你：  \n✅ 生成这 5 款商品的 SEO 描述（≤160 字符）？  \n✅ 为销量 Top 1 的商品创建限时 10% 折扣？  \n✅ 查看它们当前库存/价格/SEO 状态？  \n请告诉我下一步。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query GetPaidOrdersThisMonth($first: Int!) { orders(first: $first, query: \\\"financial_status:paid created_at:>=2026-04-01 created_at:<=2026-04-19\\\", sortKey: PROCESSED_AT, reverse: true) { ..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetPaidOrdersThisMonth($first: Int!) { orders(first: $first, query: \\\"financial_status:paid created_at:>=2026-04-01 created_at:<=2026-04-19\\\", sortKey: PROCESSED_AT, reverse: true) { ..."
+    }
+  ]
+}

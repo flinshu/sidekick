@@ -1,0 +1,101 @@
+{
+  "case_id": "sales-003",
+  "category": "sales_analytics",
+  "question": "对比本周和上周的销售表现，有哪些值得注意的变化？",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "sales-003",
+    "model": "dashscope:qwen-plus",
+    "category": "sales_analytics",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 39.188835859298706,
+    "total_tokens": 31912,
+    "tool_calls_count": 3,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 5,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手准确调用 query_store_data 两次（分别查询上周和本周订单），满足‘查两个时间段数据’要求；明确计算了销售额和订单数的环比（∞% 和 0→9），符合‘计算环比百分比’；标注了涨跌超10%的变化（全部维度均远超10%，并用⚠️强调异常模式），满足JIT指令中‘标注涨跌超10%的维度’；当发现上周无订单（样本不足）时，未回避而是明确指出‘上周无任何已支付订单’，并给出合理归因（从零启动），符合‘样本不足需明确说明’。所有分析紧扣销售表现对比，结论清晰、可操作。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 4,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query($query: String!) { orders(first: 250, query: $query) { edges { node { id name createdAt processedAt totalPrice financialStatus fulfillmentStatus customer { id email createdAt } lineItems(first: 10) { edges { node { product { id title } variant { title sku } quantity } } } } } } }\", \"variables\": {\"query\": \"financial_status:paid created_at:>=2026-04-14 created_at:<2026-04-21\"}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query($query: String!) { orders(first: 250, query: $query) { edges { node { id name createdAt processedAt totalPrice currencyCode displayFinancialStatus displayFulfillmentStatus customer { id email createdAt } lineItems(first: 10) { edges { node { product { id title } variant { id title sku } quantity } } } } } } }\", \"variables\": {\"query\": \"financial_status:paid created_at:>=2026-04-14 created_at:<2026-04-21\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query($query: String!) { orders(first: 250, query: $query) { edges { node { id name createdAt processedAt totalPrice currencyCode displayFinancialStatus customer { id email createdAt } lineItems(first: 10) { edges { node { product { id title } variant { id title sku } quantity } } } } } } }\", \"variables\": {\"query\": \"financial_status:paid created_at:>=2026-04-07 created_at:<2026-04-14\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "✅ 上周（2026-04-07 至 2026-04-14）**无任何已支付订单**（0 单，0 元销售额）。\n\n而本周（截至 4/18）已有 **9 单，$27,825 销售额**。\n\n🔍 关键结论：\n\n- **销售额环比：从 $0 → $27,825，增长 ∞%**（本质是“从零启动”）  \n- **订单数环比：0 → 9，新增 9 个客户**（所有客户 `createdAt` 均为 4/18）  \n- **主力商品**：  \n  - *The Videographer Snowboard*（3 单 × 3 件 = 9 件）→ 占销量 33%  \n  - *Selling Plans Ski Wax*（4 单 × 2–3 件 = 10 件）→ 占销量 37%  \n  - 其余为单件长尾款  \n\n⚠️ 注意：全部订单发生在 **同一天（4/18）且未发货（`displayFulfillmentStatus: UNFULFILLED`）**，极可能是**内部测试、压测或批量导入订单**，**非真实自然销售**。\n\n📌 建议行动：  \n1. 检查今日（4/18）是否有新促销上线、广告投放或邮件群发；  \n2. 确认这些订单是否为真实客户 —— 若是测试单，请勿计入业绩；  \n3. 若确为真实爆发，需立即检查库存（尤其 *Videographer Snowboard* 和 *Ski Wax* 的 variant 库存是否充足）。\n\n需要我帮你查这两款商品的实时库存，或生成补货提醒吗？",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 39.188835859298706,
+    "usage": {
+      "prompt_tokens": 30399,
+      "completion_tokens": 1513,
+      "total_tokens": 31912
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "✅ 上周（2026-04-07 至 2026-04-14）**无任何已支付订单**（0 单，0 元销售额）。\n\n而本周（截至 4/18）已有 **9 单，$27,825 销售额**。\n\n🔍 关键结论：\n\n- **销售额环比：从 $0 → $27,825，增长 ∞%**（本质是“从零启动”）  \n- **订单数环比：0 → 9，新增 9 个客户**（所有客户 `createdAt` 均为 4/18）  \n- **主力商品**：  \n  - *The Videographer Snowboard*（3 单 × 3 件 = 9 件）→ 占销量 33%  \n  - *Selling Plans Ski Wax*（4 单 × 2–3 件 = 10 件）→ 占销量 37%  \n  - 其余为单件长尾款  \n\n⚠️ 注意：全部订单发生在 **同一天（4/18）且未发货（`displayFulfillmentStatus: UNFULFILLED`）**，极可能是**内部测试、压测或批量导入订单**，**非真实自然销售**。\n\n📌 建议行动：  \n1. 检查今日（4/18）是否有新促销上线、广告投放或邮件群发；  \n2. 确认这些订单是否为真实客户 —— 若是测试单，请勿计入业绩；  \n3. 若确为真实爆发，需立即检查库存（尤其 *Videographer Snowboard* 和 *Ski Wax* 的 variant 库存是否充足）。\n\n需要我帮你查这两款商品的实时库存，或生成补货提醒吗？",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query($query: String!) { orders(first: 250, query: $query) { edges { node { id name createdAt processedAt totalPrice financialStatus fulfillmentStatus customer { id email createdAt } lineIt..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query($query: String!) { orders(first: 250, query: $query) { edges { node { id name createdAt processedAt totalPrice currencyCode displayFinancialStatus displayFulfillmentStatus customer { ..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query($query: String!) { orders(first: 250, query: $query) { edges { node { id name createdAt processedAt totalPrice currencyCode displayFinancialStatus customer { id email createdAt } line..."
+    }
+  ]
+}

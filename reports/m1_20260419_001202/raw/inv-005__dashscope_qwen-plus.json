@@ -1,0 +1,101 @@
+{
+  "case_id": "inv-005",
+  "category": "inventory_ops",
+  "question": "仓库 A 和仓库 B 的库存差异在哪些商品上最大？",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "inv-005",
+    "model": "dashscope:qwen-plus",
+    "category": "inventory_ops",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 33.43761110305786,
+    "total_tokens": 23871,
+    "tool_calls_count": 3,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 2,
+    "tool_selection_correct": false,
+    "jit_instruction_followed": false,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手未按 rubric 要求执行核心操作：未查询 inventoryLevels 并按 location 分组、未计算两仓库差值并排序、未给出跨仓调拨建议。相反，它因权限限制中断流程，转而向用户索要 Location ID，但 rubric 并未要求此交互；且所有工具调用均失败（ok: false），说明未成功获取任何库存数据。此外，未体现对 active 商品的筛选、差值绝对值计算、Top N 排序等关键分析步骤。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 4,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query { shop { locations(first: 10) { edges { node { id name } } } } }\"}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query($first: Int!) { products(first: $first, query: \\\"status:active\\\") { edges { node { id title variants(first: 1) { edges { node { id sku inventoryItem { id inventoryLevels(first: 10) { edges { node { location { id name } quantities(names: [\\\\\\\"available\\\\\\\", \\\\\\\"on_hand\\\\\\\"]) { name quantity } } } } } } } } } } } }\", \"variables\": {\"first\": 20}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query($first: Int!) { products(first: $first, query: \\\"status:active\\\") { edges { node { id title variants(first: 1) { edges { node { id sku inventoryItem { id inventoryLevels(first: 5) { edges { node { location { id name } } } } } } } } } } } }\", \"variables\": {\"first\": 10}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors"
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:default] 按通用助手模式处理：先理解用户意图，再决定下一步行动。如果还需要更多数据，请继续调用 que",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 "
+    ],
+    "final_content": "权限限制明确：`name` 字段不可读（需 `read_locations`），但 `id` 字段**可读**。\n\n所以我们能拿到 location ID（如 `gid://shopify/Location/123456789`），只是看不到名字。  \n而你只需告诉我：  \n🔹 **仓库 A 的 Location ID**（例如复制自 Shopify 后台 URL 或库存页）  \n🔹 **仓库 B 的 Location ID**  \n\n一旦你提供两个 ID，我立刻：\n- 扫描所有 active variants  \n- 对每个 variant，查它在 A 和 B 的 `available` 库存  \n- 计算 `|A - B|`，返回差异 Top 10 商品（含 SKU、标题、差值）  \n\n---\n\n### ✅ 请提供：\n> “仓库 A 的 Location ID 是：`xxx`”  \n> “仓库 B 的 Location ID 是：`yyy`”\n\n（可在 Shopify 后台 → Settings → Locations → 点进某个仓库 → 浏览器地址栏看到 `location_id=123456789`，或复制完整 GraphQL ID）\n\n我等你确认 👇",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 33.43761110305786,
+    "usage": {
+      "prompt_tokens": 22750,
+      "completion_tokens": 1121,
+      "total_tokens": 23871
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "权限限制明确：`name` 字段不可读（需 `read_locations`），但 `id` 字段**可读**。\n\n所以我们能拿到 location ID（如 `gid://shopify/Location/123456789`），只是看不到名字。  \n而你只需告诉我：  \n🔹 **仓库 A 的 Location ID**（例如复制自 Shopify 后台 URL 或库存页）  \n🔹 **仓库 B 的 Location ID**  \n\n一旦你提供两个 ID，我立刻：\n- 扫描所有 active variants  \n- 对每个 variant，查它在 A 和 B 的 `available` 库存  \n- 计算 `|A - B|`，返回差异 Top 10 商品（含 SKU、标题、差值）  \n\n---\n\n### ✅ 请提供：\n> “仓库 A 的 Location ID 是：`xxx`”  \n> “仓库 B 的 Location ID 是：`yyy`”\n\n（可在 Shopify 后台 → Settings → Locations → 点进某个仓库 → 浏览器地址栏看到 `location_id=123456789`，或复制完整 GraphQL ID）\n\n我等你确认 👇",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query { shop { locations(first: 10) { edges { node { id name } } } } }\"}"
+    },
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query($first: Int!) { products(first: $first, query: \\\"status:active\\\") { edges { node { id title variants(first: 1) { edges { node { id sku inventoryItem { id inventoryLevels(first: 10) { ..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query($first: Int!) { products(first: $first, query: \\\"status:active\\\") { edges { node { id title variants(first: 1) { edges { node { id sku inventoryItem { id inventoryLevels(first: 5) { e..."
+    }
+  ]
+}

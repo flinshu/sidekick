@@ -1,0 +1,80 @@
+{
+  "case_id": "sales-002",
+  "category": "sales_analytics",
+  "question": "哪些商品本月销量最高？给我前 5 个。",
+  "model": "dashscope:qwen-max",
+  "rubric": {
+    "case_id": "sales-002",
+    "model": "dashscope:qwen-max",
+    "category": "sales_analytics",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 43.197386026382446,
+    "total_tokens": 18830,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": null,
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-max",
+      "dashscope:qwen-max",
+      "dashscope:qwen-max"
+    ],
+    "successful_model": "dashscope:qwen-max",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query TopSellingProductsThisMonth {\\\\n  orders(first: 100, query: \\\"created_at:>=2026-04-01 created_at:<2026-05-01\\\", reverse: true) {\\\\n    edges {\\\\n      node {\\\\n        lineItems(first: 10) {\\\\n          edges {\\\\n            node {\\\\n              product {\\\\n                id\\\\n                title\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n    }\\\\n  }\\\\n}\", \"variables\": {}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query TopSellingProductsThisMonth {  orders(first: 100, query: \\\"created_at:>=2026-04-01 created_at:<2026-05-01\\\", reverse: true) {    edges {      node {        lineItems(first: 10) {          edges {            node {              product {                id                title              }            }          }        }      }    }  }}\", \"variables\": {}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "本月销量最高的前5个商品如下：\n\n1. **The Complete Snowboard** - 销量最高，出现了多次。\n2. **Selling Plans Ski Wax** - 同样有较高的销售频率。\n3. **Gift Card** - 作为礼品卡，也受到了不少顾客的青睐。\n4. **The Multi-managed Snowboard** - 表现良好，在多个订单中出现。\n5. **The Collection Snowboard: Liquid** - 也有不错的销量表现。\n\n请注意，这些结果基于当前获取到的数据样本。如果需要更详细的分析或具体数字，请告知我进一步的需求。此外，由于没有上个月的具体数据进行对比，无法直接提供环比变化情况。如果有更多历史数据需求或其他特定时间段的比较，请告诉我。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 43.197386026382446,
+    "usage": {
+      "prompt_tokens": 18365,
+      "completion_tokens": 465,
+      "total_tokens": 18830
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "本月销量最高的前5个商品如下：\n\n1. **The Complete Snowboard** - 销量最高，出现了多次。\n2. **Selling Plans Ski Wax** - 同样有较高的销售频率。\n3. **Gift Card** - 作为礼品卡，也受到了不少顾客的青睐。\n4. **The Multi-managed Snowboard** - 表现良好，在多个订单中出现。\n5. **The Collection Snowboard: Liquid** - 也有不错的销量表现。\n\n请注意，这些结果基于当前获取到的数据样本。如果需要更详细的分析或具体数字，请告知我进一步的需求。此外，由于没有上个月的具体数据进行对比，无法直接提供环比变化情况。如果有更多历史数据需求或其他特定时间段的比较，请告诉我。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query TopSellingProductsThisMonth {\\\\n  orders(first: 100, query: \\\"created_at:>=2026-04-01 created_at:<2026-05-01\\\", reverse: true) {\\\\n    edges {\\\\n      node {\\\\n        lineItems(first..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query TopSellingProductsThisMonth {  orders(first: 100, query: \\\"created_at:>=2026-04-01 created_at:<2026-05-01\\\", reverse: true) {    edges {      node {        lineItems(first: 10) {     ..."
+    }
+  ]
+}

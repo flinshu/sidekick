@@ -1,0 +1,37 @@
+[project]
+name = "sidekick-workspace"
+version = "0.1.0"
+description = "Sidekick POC monorepo root"
+requires-python = ">=3.11"
+dependencies = [
+    "sidekick-api",
+    "sidekick-agent",
+    "sidekick-tools",
+    "sidekick-evals",
+    "sidekick-worker",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "pytest-xdist>=3.6",
+    "respx>=0.22",
+    "ruff>=0.8",
+    "mypy>=1.13",
+]
+
+[tool.uv.workspace]
+members = ["apps/api", "apps/worker", "packages/tools", "packages/agent", "packages/evals"]
+
+[tool.uv.sources]
+sidekick-api = { workspace = true }
+sidekick-tools = { workspace = true }
+sidekick-agent = { workspace = true }
+sidekick-evals = { workspace = true }
+sidekick-worker = { workspace = true }
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["."]

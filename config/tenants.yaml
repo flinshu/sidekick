@@ -1,0 +1,19 @@
+# 租户注册表：shop_domain → 配置
+# POC 阶段用 .env 明文 token，无加密。生产应换成密钥管理 + DB。
+#
+# 当前配置只有一家——sp01-aacglhym。M2 demo 时增加 2-3 个 dev store 测试租户切换。
+
+tenants:
+  - shop_domain: sp01-aacglhym.myshopify.com
+    display_name: SP01 Test Store
+    locale: zh-CN
+    token_env: SHOPIFY_ADMIN_TOKEN
+    api_version: "2025-10"
+    default_task_type: chinese_merchant
+
+  - shop_domain: sp02-pxai0vu5.myshopify.com
+    display_name: SP02 Test Store
+    locale: zh-CN
+    token_env: SHOPIFY_ADMIN_TOKEN_SP02
+    api_version: "2025-10"
+    default_task_type: chinese_merchant

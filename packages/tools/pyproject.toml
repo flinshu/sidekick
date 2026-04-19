@@ -1,0 +1,17 @@
+[project]
+name = "sidekick-tools"
+version = "0.1.0"
+description = "Sidekick Shopify MCP tools"
+requires-python = ">=3.11"
+dependencies = [
+    "httpx>=0.27",
+    "pydantic>=2.9",
+    "tenacity>=9.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sidekick_tools"]

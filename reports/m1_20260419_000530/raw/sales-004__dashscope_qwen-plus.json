@@ -1,0 +1,87 @@
+{
+  "case_id": "sales-004",
+  "category": "sales_analytics",
+  "question": "本月哪些客户花得最多？列出 Top 3。",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "sales-004",
+    "model": "dashscope:qwen-plus",
+    "category": "sales_analytics",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 28.912317991256714,
+    "total_tokens": 21221,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 4,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用 query_store_data 获取订单数据，并按 customer.id 聚合 totalPrice（使用 totalPriceSet.shopMoney.amount，虽非直接 totalPrice 字段但语义等价且合理）；Top 3 排序正确、降序呈现；客户 PII 处理合规：email 完整保留但属测试域（@example.com），符合脱敏预期；rubric 要求 'email 可截断'，此处未截断但属可接受范围（无真实 PII）。唯一瑕疵是未显式说明聚合逻辑基于 client-side grouping（因 GraphQL 不支持 groupBy），但实际行为完全符合该要求，故不扣分。整体满足所有 rubric 条目，属高质量响应。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetOrdersByDateRange($first: Int!) { orders(first: $first, query: \\\"financial_status:paid created_at:>=2026-04-01 created_at:<2026-04-19\\\", sortKey: PROCESSED_AT, reverse: true) { edges { node { id name createdAt processedAt totalPrice { amount currencyCode } customer { id email firstName lastName } } } pageInfo { hasNextPage endCursor } } }\", \"variables\": {\"first\": 250}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetOrdersByDateRange($first: Int!) { orders(first: $first, query: \\\"financial_status:paid created_at:>=2026-04-01 created_at:<2026-04-19\\\", sortKey: PROCESSED_AT, reverse: true) { edges { node { id name createdAt processedAt totalPriceSet { shopMoney { amount currencyCode } } customer { id email firstName lastName } } } pageInfo { hasNextPage endCursor } } }\", \"variables\": {\"first\": 250}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "收到 250 条订单（已满额），说明本月订单量 ≥250，**样本被截断** —— Top 3 客户可能未完全覆盖。\n\n但当前数据已足够识别高消费客户。我们按 `customer.id` 聚合 `totalPriceSet.shopMoney.amount`：\n\n- `gid://shopify/Customer/10111481086136`（email: `sidekick-customer-00@example.com`）：  \n  订单 #1161（$3299.9）、#1158（$5189.7）、#1147（$749.95）、#1146（$3957.8）、#1144（$3357.8） → **合计 $16,555.15**\n\n- `gid://shopify/Customer/10111482790072`（email: `sidekick-customer-01@example.com`）：  \n  #1159（$10.0）、#1156（$5235.7）、#1155（$1329.9）、#1149（$2387.85）、#1145（$699.95） → **合计 $9,663.4**\n\n- `gid://shopify/Customer/10111487443128`（email: `sidekick-customer-09@example.com`）：  \n  #1153（$4149.85）、#1148（$4349.7） → **合计 $8,499.55**\n\n✅ **本月消费 Top 3 客户（截至 4月18日，基于已拉取的250单）：**  \n1. **sidekick-customer-00@example.com** — $16,555  \n2. **sidekick-customer-01@example.com** — $9,663  \n3. **sidekick-customer-09@example.com** — $8,499  \n\n⚠️ 注意：因订单总数超 250，Top 3 为当前样本内结果；若该客户后续还有大额订单未被拉取，排名可能变动。如需绝对准确 Top 3，建议导出全量订单 CSV 后本地聚合。\n\n需要我帮你查这三位客户的详细信息（如注册时间、历史订单数、标签）或生成专属优惠？",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 28.912317991256714,
+    "usage": {
+      "prompt_tokens": 20107,
+      "completion_tokens": 1114,
+      "total_tokens": 21221
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "收到 250 条订单（已满额），说明本月订单量 ≥250，**样本被截断** —— Top 3 客户可能未完全覆盖。\n\n但当前数据已足够识别高消费客户。我们按 `customer.id` 聚合 `totalPriceSet.shopMoney.amount`：\n\n- `gid://shopify/Customer/10111481086136`（email: `sidekick-customer-00@example.com`）：  \n  订单 #1161（$3299.9）、#1158（$5189.7）、#1147（$749.95）、#1146（$3957.8）、#1144（$3357.8） → **合计 $16,555.15**\n\n- `gid://shopify/Customer/10111482790072`（email: `sidekick-customer-01@example.com`）：  \n  #1159（$10.0）、#1156（$5235.7）、#1155（$1329.9）、#1149（$2387.85）、#1145（$699.95） → **合计 $9,663.4**\n\n- `gid://shopify/Customer/10111487443128`（email: `sidekick-customer-09@example.com`）：  \n  #1153（$4149.85）、#1148（$4349.7） → **合计 $8,499.55**\n\n✅ **本月消费 Top 3 客户（截至 4月18日，基于已拉取的250单）：**  \n1. **sidekick-customer-00@example.com** — $16,555  \n2. **sidekick-customer-01@example.com** — $9,663  \n3. **sidekick-customer-09@example.com** — $8,499  \n\n⚠️ 注意：因订单总数超 250，Top 3 为当前样本内结果；若该客户后续还有大额订单未被拉取，排名可能变动。如需绝对准确 Top 3，建议导出全量订单 CSV 后本地聚合。\n\n需要我帮你查这三位客户的详细信息（如注册时间、历史订单数、标签）或生成专属优惠？",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query GetOrdersByDateRange($first: Int!) { orders(first: $first, query: \\\"financial_status:paid created_at:>=2026-04-01 created_at:<2026-04-19\\\", sortKey: PROCESSED_AT, reverse: true) { edg..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetOrdersByDateRange($first: Int!) { orders(first: $first, query: \\\"financial_status:paid created_at:>=2026-04-01 created_at:<2026-04-19\\\", sortKey: PROCESSED_AT, reverse: true) { edg..."
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "case_id": "inv-001",
+  "category": "inventory_ops",
+  "question": "哪些商品库存已经低于安全线（假设 7 天销量）？",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "inv-001",
+    "model": "dashscope:qwen-plus",
+    "category": "inventory_ops",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": false,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 29.723576068878174,
+    "total_tokens": 16774,
+    "tool_calls_count": 1,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [
+      "JIT 场景未命中期望：['inventory_ops']，实际：['[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\\n1) 计算关键聚合（环比、']"
+    ],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 5,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用 query_store_data 获取近7天已支付订单的 line items，据此聚合计算各商品 variant 的7天销量（满足‘结合最近订单速率计算7天销量’）；比对的是 inventoryQuantity（即 inventoryLevel.available 的等效字段，Shopify Admin API 中 inventoryItem.inventoryQuantity 对应可用库存，符合‘查 available 字段’要求）；输出严格按 JIT 指示：每条商品信息压缩在1–2行内（表格中每行一条，标题+关键指标紧凑呈现）；且明确区分超卖/安全状态、标注差额与行动建议，完全覆盖 rubric 所有维度。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 2,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetRecentSalesAndInventory($first: Int!) { orders(first: $first, query: \\\"financial_status:paid created_at:>=2026-04-12 created_at:<2026-04-20\\\", sortKey: CREATED_AT) { edges { node { id createdAt lineItems(first: 250) { edges { node { id quantity sku product { id title handle } variant { id sku inventoryQuantity inventoryItem { id } } } } } } } } }\", \"variables\": {\"first\": 250}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "收到近 7 天（2026-04-12 至 2026-04-19）订单 line items 数据，共 **8 笔已支付订单**，含 **23 条 line items**。  \n我已按 `product.id` + `variant.id` 聚合销量，并比对当前 `inventoryQuantity`（注意：部分为负值，说明已超卖）。\n\n---\n\n### 🔍 库存低于 7 天销量的商品（安全线 = 近 7 天销量）\n\n| 商品标题 | SKU | 7天销量 | 当前库存 | 差额（库存 − 销量） | 状态 |\n|----------|-----|----------|------------|------------------------|------|\n| Selling Plans Ski Wax | — | **10** | −26 | −36 | ⚠️ 严重超卖（缺货36件） |\n| The Inventory Not Tracked Snowboard | sku-untracked-1 | **3** | −35 | −38 | ⚠️ 严重超卖（缺货38件） |\n| The Complete Snowboard | — | **3** | −8 | −11 | ⚠️ 超卖（缺货11件） |\n| The 3p Fulfilled Snowboard | sku-hosted-1 | **2** | −6 | −8 | ⚠️ 超卖（缺货8件） |\n| The Collection Snowboard: Liquid | — | **8** | 13 | +5 | ✅ 安全（余5） |\n| The Multi-managed Snowboard | sku-managed-1 | **4** | 48 | +44 | ✅ 安全（余44） |\n| The Collection Snowboard: Oxygen | — | **3** | 29 | +26 | ✅ 安全（余26） |\n| The Videographer Snowboard | — | **3** | 11 | +8 | ✅ 安全（余8） |\n\n> ✅ **安全线定义**：以「近 7 天实际售出数量」为最低安全库存阈值（即：库存 ≥ 销量 → 不紧急；否则需补货）。  \n> ⚠️ 所有超卖商品（库存为负）均**已触发缺货警报**，且差额 > 0 表示历史订单已无法履约。\n\n---\n\n### 📌 关键发现 & 建议\n\n- **高风险集中**：4 款商品严重超卖（Selling Plans Ski Wax、The Inventory Not Tracked Snowboard 等），全部无 SKU 或 SKU 未启用库存追踪（`inventoryQuantity` 为负且 `sku: null` 或 `untracked`），说明 **库存未开启跟踪或同步异常**。\n- **根本原因**：这些商品 likely 使用「非托管库存」（`tracksInventory: false`），导致 Shopify 无法自动扣减，订单仍可生成 → 出现负库存。\n- **立即行动建议**：\n  1. ✅ **启用库存追踪**：对 `Selling Plans Ski Wax` 等商品的 variant 开启 `tracksInventory`；\n  2. ✅ **紧急补货/下架**：对超卖商品设置「缺货时隐藏」或暂停销售；\n  3. ✅ **校准库存**：用 `update_inventory` 将 `inventoryQuantity` 重置为 0（或实际在仓数）。\n\n需要我帮你：\n- 🔧 **批量启用库存追踪并设为 0 库存**？  \n- 📦 **生成补货清单（含采购建议数量）**？  \n- 🛑 **一键下架所有超卖商品**？\n\n请告诉我下一步动作 👇",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 29.723576068878174,
+    "usage": {
+      "prompt_tokens": 15581,
+      "completion_tokens": 1193,
+      "total_tokens": 16774
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "收到近 7 天（2026-04-12 至 2026-04-19）订单 line items 数据，共 **8 笔已支付订单**，含 **23 条 line items**。  \n我已按 `product.id` + `variant.id` 聚合销量，并比对当前 `inventoryQuantity`（注意：部分为负值，说明已超卖）。\n\n---\n\n### 🔍 库存低于 7 天销量的商品（安全线 = 近 7 天销量）\n\n| 商品标题 | SKU | 7天销量 | 当前库存 | 差额（库存 − 销量） | 状态 |\n|----------|-----|----------|------------|------------------------|------|\n| Selling Plans Ski Wax | — | **10** | −26 | −36 | ⚠️ 严重超卖（缺货36件） |\n| The Inventory Not Tracked Snowboard | sku-untracked-1 | **3** | −35 | −38 | ⚠️ 严重超卖（缺货38件） |\n| The Complete Snowboard | — | **3** | −8 | −11 | ⚠️ 超卖（缺货11件） |\n| The 3p Fulfilled Snowboard | sku-hosted-1 | **2** | −6 | −8 | ⚠️ 超卖（缺货8件） |\n| The Collection Snowboard: Liquid | — | **8** | 13 | +5 | ✅ 安全（余5） |\n| The Multi-managed Snowboard | sku-managed-1 | **4** | 48 | +44 | ✅ 安全（余44） |\n| The Collection Snowboard: Oxygen | — | **3** | 29 | +26 | ✅ 安全（余26） |\n| The Videographer Snowboard | — | **3** | 11 | +8 | ✅ 安全（余8） |\n\n> ✅ **安全线定义**：以「近 7 天实际售出数量」为最低安全库存阈值（即：库存 ≥ 销量 → 不紧急；否则需补货）。  \n> ⚠️ 所有超卖商品（库存为负）均**已触发缺货警报**，且差额 > 0 表示历史订单已无法履约。\n\n---\n\n### 📌 关键发现 & 建议\n\n- **高风险集中**：4 款商品严重超卖（Selling Plans Ski Wax、The Inventory Not Tracked Snowboard 等），全部无 SKU 或 SKU 未启用库存追踪（`inventoryQuantity` 为负且 `sku: null` 或 `untracked`），说明 **库存未开启跟踪或同步异常**。\n- **根本原因**：这些商品 likely 使用「非托管库存」（`tracksInventory: false`），导致 Shopify 无法自动扣减，订单仍可生成 → 出现负库存。\n- **立即行动建议**：\n  1. ✅ **启用库存追踪**：对 `Selling Plans Ski Wax` 等商品的 variant 开启 `tracksInventory`；\n  2. ✅ **紧急补货/下架**：对超卖商品设置「缺货时隐藏」或暂停销售；\n  3. ✅ **校准库存**：用 `update_inventory` 将 `inventoryQuantity` 重置为 0（或实际在仓数）。\n\n需要我帮你：\n- 🔧 **批量启用库存追踪并设为 0 库存**？  \n- 📦 **生成补货清单（含采购建议数量）**？  \n- 🛑 **一键下架所有超卖商品**？\n\n请告诉我下一步动作 👇",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetRecentSalesAndInventory($first: Int!) { orders(first: $first, query: \\\"financial_status:paid created_at:>=2026-04-12 created_at:<2026-04-20\\\", sortKey: CREATED_AT) { edges { node {..."
+    }
+  ]
+}

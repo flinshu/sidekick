@@ -1,0 +1,88 @@
+{
+  "case_id": "sales-001",
+  "category": "sales_analytics",
+  "question": "上周订单数和总销售额是多少？",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "sales-001",
+    "model": "dashscope:qwen-plus",
+    "category": "sales_analytics",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 17.898605823516846,
+    "total_tokens": 23659,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 5,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": true,
+    "graphql_fields_reasonable": true,
+    "reasoning": "助手正确调用了 query_store_data 工具，且 GraphQL 查询中明确过滤了 financial_status:paid 和 created_at 时间范围（>=2026-04-12 且 <2026-04-19），精准对应「上周」；查询字段包含 totalPrice（用于销售额）和 id（隐式支持计数，实际通过 edges/node 可统计订单数）；最终回复清晰给出订单总数（75 单）和总销售额（¥392,418.20），完全满足 rubric 三项要求。补充洞察虽非必需，但未干扰核心答案，且基于返回数据合理推导。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetLastWeekOrders($first: Int!) { orders(first: $first, query: \\\"financial_status:paid created_at:>=2026-04-12 created_at:<2026-04-19\\\") { edges { node { id totalPrice { amount } } } pageInfo { hasNextPage } } }\", \"variables\": {\"first\": 250}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors: Selections can't be made on scalars (field 'totalPrice' returns Money but has selections [\"amount\"])"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetLastWeekOrders($first: Int!) { orders(first: $first, query: \\\"financial_status:paid created_at:>=2026-04-12 created_at:<2026-04-19\\\") { edges { node { id totalPrice } } pageInfo { hasNextPage } } }\", \"variables\": {\"first\": 250}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "已获取上周（2026-04-12 至 2026-04-18）的订单数据。\n\n✅ **关键结果：**  \n- **订单总数：75 单**  \n- **总销售额：¥392,418.20**（人民币，按订单中 `totalPrice` 字段累加）\n\n📊 **补充洞察：**  \n- 平均客单价约 ¥5,232，说明高单价订单占比较高（如多笔超 ¥8,000 订单）；  \n- 最大单笔订单 ¥11,889.60，最小仅 ¥9.95，客群价格带宽广；  \n- 数据样本充足（75 单），结论稳健，无截断风险。\n\n如需对比前一周、分析热销品类、Top 客户或生成销售简报，可随时告诉我。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 17.898605823516846,
+    "usage": {
+      "prompt_tokens": 23023,
+      "completion_tokens": 636,
+      "total_tokens": 23659
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "已获取上周（2026-04-12 至 2026-04-18）的订单数据。\n\n✅ **关键结果：**  \n- **订单总数：75 单**  \n- **总销售额：¥392,418.20**（人民币，按订单中 `totalPrice` 字段累加）\n\n📊 **补充洞察：**  \n- 平均客单价约 ¥5,232，说明高单价订单占比较高（如多笔超 ¥8,000 订单）；  \n- 最大单笔订单 ¥11,889.60，最小仅 ¥9.95，客群价格带宽广；  \n- 数据样本充足（75 单），结论稳健，无截断风险。\n\n如需对比前一周、分析热销品类、Top 客户或生成销售简报，可随时告诉我。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query GetLastWeekOrders($first: Int!) { orders(first: $first, query: \\\"financial_status:paid created_at:>=2026-04-12 created_at:<2026-04-19\\\") { edges { node { id totalPrice { amount } } } ..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetLastWeekOrders($first: Int!) { orders(first: $first, query: \\\"financial_status:paid created_at:>=2026-04-12 created_at:<2026-04-19\\\") { edges { node { id totalPrice } } pageInfo { ..."
+    }
+  ]
+}

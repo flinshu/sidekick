@@ -1,0 +1,159 @@
+{
+  "case_id": "mix-001",
+  "category": "mixed_intent",
+  "question": "上周销量下滑的商品有哪些？给这些商品各写一个促销文案。",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "mix-001",
+    "model": "dashscope:qwen-plus",
+    "category": "mixed_intent",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": false,
+    "completed": false,
+    "rational_refusal": false,
+    "latency_s": 53.391852140426636,
+    "total_tokens": 71028,
+    "tool_calls_count": 7,
+    "fallback_count": 1,
+    "validation_retries": 0,
+    "notes": [
+      "query_store_data 参数不是合法 JSON: {\"query\": \"query GetProducts($ids: [ID!]!) { nodes(ids: $ids) { ... on Product {",
+      "未完成：error=所有模型都失败，hit_max_iterations=False"
+    ],
+    "hard_pass": false
+  },
+  "judge": null,
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 8,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetOrders($query: String!) { orders(first: 250, query: $query) { edges { node { id createdAt processedAt financialStatus fulfillmentStatus totalPrice totalDiscounts lineItems(first: 50) { edges { node { product { id title handle } variant { id title sku } quantity } } } } } } }\", \"variables\": {\"query\": \"financial_status:paid created_at:>=2026-04-12 created_at:<2026-04-19\"}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors: Field 'financialStatus' doesn't exist on type 'Order' | Field 'fulfillmentStatus' doesn't exist on type 'Order'"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetOrders($query: String!) { orders(first: 250, query: $query) { edges { node { id createdAt processedAt displayFinancialStatus displayFulfillmentStatus totalPrice totalDiscounts lineItems(first: 50) { edges { node { product { id title handle } variant { id title sku } quantity } } } } } } }\", \"variables\": {\"query\": \"display_financial_status:paid created_at:>=2026-04-12 created_at:<2026-04-19\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetOrders($query: String!) { orders(first: 250, query: $query) { edges { node { id createdAt processedAt displayFinancialStatus displayFulfillmentStatus totalPrice totalDiscounts lineItems(first: 50) { edges { node { product { id title handle } variant { id title sku } quantity } } } } } } }\", \"variables\": {\"query\": \"display_financial_status:paid created_at:>=2026-04-05 created_at:<2026-04-12\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetOrders($query: String!) { orders(first: 250, query: $query) { edges { node { id createdAt processedAt displayFinancialStatus displayFulfillmentStatus totalPrice totalDiscounts lineItems(first: 50) { edges { node { product { id title handle } variant { id title sku } quantity } } } } } } }\", \"variables\": {\"query\": \"display_financial_status:paid created_at:>=2026-03-29 created_at:<2026-04-05\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetOrders($query: String!) { orders(first: 250, query: $query) { edges { node { id createdAt processedAt displayFinancialStatus displayFulfillmentStatus totalPrice totalDiscounts lineItems(first: 50) { edges { node { product { id title handle } variant { id title sku } quantity } } } } } } }\", \"variables\": {\"query\": \"display_financial_status:paid created_at:>=2026-03-22 created_at:<2026-03-29\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetOrders($query: String!) { orders(first: 250, query: $query) { edges { node { id createdAt processedAt displayFinancialStatus displayFulfillmentStatus totalPrice totalDiscounts lineItems(first: 50) { edges { node { product { id title handle } variant { id title sku } quantity } } } } } } }\", \"variables\": {\"query\": \"display_financial_status:paid\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetProducts($ids: [ID!]!) { nodes(ids: $ids) { ... on Product { id title handle descriptionHtml seo { title description } tags productType } } }\", \"variables\": {\"ids\": [\"gid://shopify/Product/10373911806136\", \"gid://shopify/Product/10373912232120\", \"gid://shopify/Product/10373911675064\", \"gid://shopify/Product/10373912133816\", \"gid://shopify/Product/10373912002744\", \"gid://shopify/Product/10373911871672\", \"gid://shopify/Product/10373912199352\", \"gid://shopify/Product/10373912166584\", \"gid://shopify/Product/10373912035512\"]}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1"
+    ],
+    "final_content": null,
+    "fallback_events": [
+      {
+        "model_failed": "dashscope:qwen-plus",
+        "error": "litellm.BadRequestError: DashscopeException - <400> InternalError.Algo.InvalidParameter: The \"function.arguments\" parameter of the code model must be in JSON format."
+      }
+    ],
+    "validation_retries": 0,
+    "error": "所有模型都失败",
+    "latency_s": 53.391852140426636,
+    "usage": {
+      "prompt_tokens": 69319,
+      "completion_tokens": 1709,
+      "total_tokens": 71028
+    },
+    "completed": false,
+    "hit_max_iterations": false
+  },
+  "final_content": "",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query GetOrders($query: String!) { orders(first: 250, query: $query) { edges { node { id createdAt processedAt financialStatus fulfillmentStatus totalPrice totalDiscounts lineItems(first: 5..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetOrders($query: String!) { orders(first: 250, query: $query) { edges { node { id createdAt processedAt displayFinancialStatus displayFulfillmentStatus totalPrice totalDiscounts line..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetOrders($query: String!) { orders(first: 250, query: $query) { edges { node { id createdAt processedAt displayFinancialStatus displayFulfillmentStatus totalPrice totalDiscounts line..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetOrders($query: String!) { orders(first: 250, query: $query) { edges { node { id createdAt processedAt displayFinancialStatus displayFulfillmentStatus totalPrice totalDiscounts line..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetOrders($query: String!) { orders(first: 250, query: $query) { edges { node { id createdAt processedAt displayFinancialStatus displayFulfillmentStatus totalPrice totalDiscounts line..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetOrders($query: String!) { orders(first: 250, query: $query) { edges { node { id createdAt processedAt displayFinancialStatus displayFulfillmentStatus totalPrice totalDiscounts line..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetProducts($ids: [ID!]!) { nodes(ids: $ids) { ... on Product { id title handle descriptionHtml seo { title description } tags productType } } }\", \"variables\": {\"ids\": [\"gid://shopify..."
+    }
+  ]
+}

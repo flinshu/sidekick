@@ -1,0 +1,73 @@
+{
+  "case_id": "sales-004",
+  "category": "sales_analytics",
+  "question": "本月哪些客户花得最多？列出 Top 3。",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "sales-004",
+    "model": "zhipu:glm-5",
+    "category": "sales_analytics",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 28.89000391960144,
+    "total_tokens": 14906,
+    "tool_calls_count": 1,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 4,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用了 query_store_data 查询 orders，并隐含包含了 customer { id }（因后续能按客户聚合且邮箱与 ID 一一对应，说明 customer.id 可用）；虽未在回复中显式说明‘客户端按 customer.id 分组求和’，但 Top 3 结果逻辑一致，表明已执行该聚合；输出严格 Top 3 且按消费降序；客户邮箱已脱敏为 test-*@example.com 格式，符合 PII 合理处理要求。唯一小瑕疵：未明确说明聚合发生在客户端，但结果正确且上下文合理，不影响实质满足 rubric。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 2,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  orders(first: 250, query: \\\"financial_status:paid created_at:>=2026-04-01\\\") {\\n    edges {\\n      node {\\n        id\\n        totalPrice\\n        customer {\\n          id\\n          firstName\\n          lastName\\n          email\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "根据本月（2026年4月）的订单数据，我已按客户消费金额汇总，以下是 **Top 3 消费客户**：\n\n---\n\n## 🏆 本月消费 Top 3\n\n| 排名 | 客户邮箱 | 消费金额 | 订单数 |\n|------|----------|----------|--------|\n| **1** | test-4611@example.com | **$10,992.75** | 1 笔 |\n| **2** | test-8573@example.com | **$8,599.75** | 1 笔 |\n| **3** | test-4598@example.com | **$7,964.85** | 1 笔 |\n\n---\n\n**补充说明**：\n- 本月共有 **40+ 笔已支付订单**，数据样本充足\n- Top 3 客户合计消费 **$27,557.35**，占本月总销售额的显著份额\n- 这三位都是高客单价客户，单笔订单金额均在 $7,000 以上\n\n如需查看这些客户的详细订单明细或为他们设置专属优惠，请告诉我。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 28.89000391960144,
+    "usage": {
+      "prompt_tokens": 13758,
+      "completion_tokens": 1148,
+      "total_tokens": 14906
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "根据本月（2026年4月）的订单数据，我已按客户消费金额汇总，以下是 **Top 3 消费客户**：\n\n---\n\n## 🏆 本月消费 Top 3\n\n| 排名 | 客户邮箱 | 消费金额 | 订单数 |\n|------|----------|----------|--------|\n| **1** | test-4611@example.com | **$10,992.75** | 1 笔 |\n| **2** | test-8573@example.com | **$8,599.75** | 1 笔 |\n| **3** | test-4598@example.com | **$7,964.85** | 1 笔 |\n\n---\n\n**补充说明**：\n- 本月共有 **40+ 笔已支付订单**，数据样本充足\n- Top 3 客户合计消费 **$27,557.35**，占本月总销售额的显著份额\n- 这三位都是高客单价客户，单笔订单金额均在 $7,000 以上\n\n如需查看这些客户的详细订单明细或为他们设置专属优惠，请告诉我。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  orders(first: 250, query: \\\"financial_status:paid created_at:>=2026-04-01\\\") {\\n    edges {\\n      node {\\n        id\\n        totalPrice\\n        customer {\\n          id\\n          fi..."
+    }
+  ]
+}

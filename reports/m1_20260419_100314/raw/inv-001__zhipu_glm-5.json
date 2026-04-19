@@ -1,0 +1,79 @@
+{
+  "case_id": "inv-001",
+  "category": "inventory_ops",
+  "question": "哪些商品库存已经低于安全线（假设 7 天销量）？",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "inv-001",
+    "model": "zhipu:glm-5",
+    "category": "inventory_ops",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 122.67805814743042,
+    "total_tokens": 21587,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": null,
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 2,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  products(first: 250) {\\n    edges {\\n      node {\\n        id\\n        title\\n        totalInventory\\n        vendor\\n        variants(first: 10) {\\n          edges {\\n            node {\\n              id\\n              title\\n              sku\\n              inventoryQuantity\\n              inventoryItem {\\n                id\\n              }\\n            }\\n          }\\n        }\\n      }\\n    }\\n    pageInfo {\\n      hasNextPage\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  orders(query: \\\"created_at:>=2026-04-12 financial_status:paid\\\", first: 250) {\\n    edges {\\n      node {\\n        lineItems(first: 100) {\\n          edges {\\n            node {\\n              product {\\n                id\\n              }\\n              quantity\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 122.67805814743042,
+    "usage": {
+      "prompt_tokens": 16939,
+      "completion_tokens": 4648,
+      "total_tokens": 21587
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  products(first: 250) {\\n    edges {\\n      node {\\n        id\\n        title\\n        totalInventory\\n        vendor\\n        variants(first: 10) {\\n          edges {\\n            node ..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  orders(query: \\\"created_at:>=2026-04-12 financial_status:paid\\\", first: 250) {\\n    edges {\\n      node {\\n        lineItems(first: 100) {\\n          edges {\\n            node {\\n      ..."
+    }
+  ]
+}

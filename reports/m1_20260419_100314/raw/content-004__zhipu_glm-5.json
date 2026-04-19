@@ -1,0 +1,76 @@
+{
+  "case_id": "content-004",
+  "category": "content_generation",
+  "question": "给这个商品加 3-5 个相关 tags 帮助店内搜索。商品：gid://shopify/Product/{SAMPLE_PRODUCT_ID}。",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "content-004",
+    "model": "zhipu:glm-5",
+    "category": "content_generation",
+    "tool_selection_accuracy": false,
+    "min_tool_calls_met": false,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": false,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 17.855232000350952,
+    "total_tokens": 11102,
+    "tool_calls_count": 1,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [
+      "缺失工具：['save_content']，实际调用：['query_store_data']",
+      "期望触发写操作但实际未调用任何写工具"
+    ],
+    "hard_pass": false
+  },
+  "judge": {
+    "overall": 2,
+    "tool_selection_correct": false,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "工具调用失败，但助手未尝试 fallback 查询（如用 handle 或 title 检索），也未从占位符中提取任何可用信息；rubric 要求必须查询 title/productType/existing tags 来生成 tags，而助手完全未获取到任何商品元数据，导致无法执行核心任务；虽礼貌指出问题并请求补充信息，但未体现任何基于已有线索的推理或最小可行响应（如示例 tag 模板），故在 rubric 关键维度上严重缺失。"
+  },
+  "trace": {
+    "task_type": "content_generation",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 2,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  product(id: \\\"gid://shopify/Product/{SAMPLE_PRODUCT_ID}\\\") {\\n    id\\n    title\\n    description\\n    productType\\n    vendor\\n    tags\\n    status\\n    featuredImage {\\n      url\\n      altText\\n    }\\n  }\\n}\"}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors: Invalid global id 'gid://shopify/Product/{SAMPLE_PRODUCT_ID}'"
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1"
+    ],
+    "final_content": "抱歉，`{SAMPLE_PRODUCT_ID}` 似乎是一个占位符，不是有效的商品 ID。\n\n请提供真实的商品 ID（格式如 `gid://shopify/Product/12345678`），或者告诉我：\n- 商品名称 / 标题\n- 或者商品的 handle\n\n我可以帮你查找正确的商品，然后根据商品信息生成 3-5 个相关 tags。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 17.855232000350952,
+    "usage": {
+      "prompt_tokens": 10745,
+      "completion_tokens": 357,
+      "total_tokens": 11102
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "抱歉，`{SAMPLE_PRODUCT_ID}` 似乎是一个占位符，不是有效的商品 ID。\n\n请提供真实的商品 ID（格式如 `gid://shopify/Product/12345678`），或者告诉我：\n- 商品名称 / 标题\n- 或者商品的 handle\n\n我可以帮你查找正确的商品，然后根据商品信息生成 3-5 个相关 tags。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\":\"{\\n  product(id: \\\"gid://shopify/Product/{SAMPLE_PRODUCT_ID}\\\") {\\n    id\\n    title\\n    description\\n    productType\\n    vendor\\n    tags\\n    status\\n    featuredImage {\\n      url\\n    ..."
+    }
+  ]
+}

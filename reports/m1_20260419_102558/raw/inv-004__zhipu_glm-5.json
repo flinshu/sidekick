@@ -1,0 +1,88 @@
+{
+  "case_id": "inv-004",
+  "category": "inventory_ops",
+  "question": "把 The Minimal Snowboard 的库存增加 5 件。",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "inv-004",
+    "model": "zhipu:glm-5",
+    "category": "inventory_ops",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 24.82048988342285,
+    "total_tokens": 19021,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 4,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确执行了两步：先用 query_store_data 查询商品及 variant/inventoryItem（符合 rubric 第一条），再调用 update_inventory(delta=+5)（符合第二条）；最终回复为预览+确认请求，未直接执行（符合第三条）。但预览中未明确展示 variant ID 或 inventoryItem ID，虽非 rubric 明确要求，属轻微信息完整性瑕疵，故 overall 扣1分。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  products(first: 5, query: \\\"title:The Minimal Snowboard\\\") {\\n    edges {\\n      node {\\n        id\\n        title\\n        variants(first: 5) {\\n          edges {\\n            node {\\n              id\\n              title\\n              sku\\n              inventoryQuantity\\n              inventoryItem {\\n                id\\n                sku\\n                inventoryLevels(first: 5) {\\n                  edges {\\n                    node {\\n                      id\\n                      location {\\n                        id\\n                        name\\n                      }\\n                      quantities(names: [\\\"available\\\"]) {\\n                        quantity\\n                      }\\n                    }\\n                  }\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n  shop {\\n    locations(first: 5) {\\n      edges {\\n        node {\\n          id\\n          name\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "update_inventory",
+        "arguments": "{\"inventory_item_id\":\"gid://shopify/InventoryItem/55427416719544\",\"location_id\":\"gid://shopify/Location/107984060600\",\"delta\":5,\"reason\":\"correction\"}",
+        "ok": true,
+        "requires_confirmation": true,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:write_confirmation] 此操作不可撤销。在真正调用 Shopify 之前，你必须把 previ"
+    ],
+    "final_content": "## 📦 库存调整预览\n\n| 项目 | 详情 |\n|------|------|\n| **商品** | The Minimal Snowboard |\n| **SKU** | Default Title |\n| **仓库** | Shop location |\n| **调整** | +5 件 |\n| **调整前** | 15 件 |\n| **调整后** | 20 件 |\n\n---\n\n**请确认是否执行此库存调整？** 回复\"确认\"继续，或\"取消\"放弃。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 24.82048988342285,
+    "usage": {
+      "prompt_tokens": 18261,
+      "completion_tokens": 760,
+      "total_tokens": 19021
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "## 📦 库存调整预览\n\n| 项目 | 详情 |\n|------|------|\n| **商品** | The Minimal Snowboard |\n| **SKU** | Default Title |\n| **仓库** | Shop location |\n| **调整** | +5 件 |\n| **调整前** | 15 件 |\n| **调整后** | 20 件 |\n\n---\n\n**请确认是否执行此库存调整？** 回复\"确认\"继续，或\"取消\"放弃。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  products(first: 5, query: \\\"title:The Minimal Snowboard\\\") {\\n    edges {\\n      node {\\n        id\\n        title\\n        variants(first: 5) {\\n          edges {\\n            node {\\n..."
+    },
+    {
+      "name": "update_inventory",
+      "ok": true,
+      "args_preview": "{\"inventory_item_id\":\"gid://shopify/InventoryItem/55427416719544\",\"location_id\":\"gid://shopify/Location/107984060600\",\"delta\":5,\"reason\":\"correction\"}"
+    }
+  ]
+}

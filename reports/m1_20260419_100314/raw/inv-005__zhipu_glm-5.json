@@ -1,0 +1,100 @@
+{
+  "case_id": "inv-005",
+  "category": "inventory_ops",
+  "question": "仓库 A 和仓库 B 的库存差异在哪些商品上最大？",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "inv-005",
+    "model": "zhipu:glm-5",
+    "category": "inventory_ops",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 34.63360404968262,
+    "total_tokens": 20711,
+    "tool_calls_count": 3,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 2,
+    "tool_selection_correct": false,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手未正确选择工具：rubric 明确要求查询 inventoryLevels 并按 location 分组、计算两仓库差值并排序，但所有调用均未涉及 inventoryLevels 字段或 location-level inventory 查询；第二次调用甚至失败，且未重试或构造含 locations + inventoryLevels 的合法 GraphQL 查询；最终回复错误断定‘只有一个仓库’，而用户问题预设了仓库 A/B 存在，说明工具调用未能获取真实位置库存数据；虽回复结构清晰且提供了备选分析路径（JIT instruction followed），但核心任务（识别差异最大商品及调拨建议）完全未执行。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  shop {\\n    name\\n  }\\n  locations: shop {\\n    id\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  locations(first: 10) {\\n    edges {\\n      node {\\n        id\\n        name\\n      }\\n    }\\n  }\\n  products(first: 100) {\\n    edges {\\n      node {\\n        id\\n        title\\n        variants(first: 10) {\\n          edges {\\n            node {\\n              id\\n              title\\n              sku\\n              inventoryQuantity\\n              inventoryItem {\\n                id\\n                inventoryLevels(first: 10) {\\n                  edges {\\n                    node {\\n                      available\\n                      location {\\n                        id\\n                        name\\n                      }\\n                    }\\n                  }\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors: Field 'available' doesn't exist on type 'InventoryLevel'"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  products(first: 100) {\\n    edges {\\n      node {\\n        id\\n        title\\n        variants(first: 10) {\\n          edges {\\n            node {\\n              id\\n              title\\n              sku\\n              inventoryQuantity\\n              inventoryItem {\\n                id\\n                inventoryLevels(first: 10) {\\n                  edges {\\n                    node {\\n                      quantities(names: [\\\"available\\\"]) {\\n                        name\\n                        quantity\\n                      }\\n                      location {\\n                        id\\n                        name\\n                      }\\n                    }\\n                  }\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:default] 按通用助手模式处理：先理解用户意图，再决定下一步行动。如果还需要更多数据，请继续调用 que",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 "
+    ],
+    "final_content": "根据查询结果，我发现您的店铺目前**只有一个仓库位置**：\n\n**📍 当前仓库：Shop location** (ID: gid://shopify/Location/107984060600)\n\n所有商品的库存都只记录在这一个仓库中，没有\"仓库 A\"和\"仓库 B\"两个独立仓库。\n\n---\n\n**可能的情况：**\n\n1. **您还没有设置多仓库** — 如果您确实有多个物理仓库，需要在 Shopify 后台启用多位置库存管理（Settings → Locations → Add location）\n\n2. **您指的是其他概念** — 如果您说的\"仓库 A/B\"是指：\n   - **不同商品分类**（如滑雪板 vs 配件）→ 我可以按商品类型分析库存分布\n   - **不同时间段**的库存对比 → 我可以查历史数据\n   - **虚拟分组**（如畅销 vs 滞销）→ 请告诉我具体分类标准\n\n---\n\n**当前库存概览（按商品）：**\n\n| 商品 | 库存数量 |\n|------|----------|\n| The Archived Snowboard | 50 |\n| The Draft Snowboard | 20 |\n| The Collection Snowboard: Hydrogen | 16 |\n| The Minimal Snowboard | 15 |\n| The Videographer Snowboard | 11 |\n| 其他商品 | 负库存（超卖） |\n\n需要我按其他维度帮您分析库存吗？或者您想了解如何设置多仓库？",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 34.63360404968262,
+    "usage": {
+      "prompt_tokens": 19752,
+      "completion_tokens": 959,
+      "total_tokens": 20711
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "根据查询结果，我发现您的店铺目前**只有一个仓库位置**：\n\n**📍 当前仓库：Shop location** (ID: gid://shopify/Location/107984060600)\n\n所有商品的库存都只记录在这一个仓库中，没有\"仓库 A\"和\"仓库 B\"两个独立仓库。\n\n---\n\n**可能的情况：**\n\n1. **您还没有设置多仓库** — 如果您确实有多个物理仓库，需要在 Shopify 后台启用多位置库存管理（Settings → Locations → Add location）\n\n2. **您指的是其他概念** — 如果您说的\"仓库 A/B\"是指：\n   - **不同商品分类**（如滑雪板 vs 配件）→ 我可以按商品类型分析库存分布\n   - **不同时间段**的库存对比 → 我可以查历史数据\n   - **虚拟分组**（如畅销 vs 滞销）→ 请告诉我具体分类标准\n\n---\n\n**当前库存概览（按商品）：**\n\n| 商品 | 库存数量 |\n|------|----------|\n| The Archived Snowboard | 50 |\n| The Draft Snowboard | 20 |\n| The Collection Snowboard: Hydrogen | 16 |\n| The Minimal Snowboard | 15 |\n| The Videographer Snowboard | 11 |\n| 其他商品 | 负库存（超卖） |\n\n需要我按其他维度帮您分析库存吗？或者您想了解如何设置多仓库？",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  shop {\\n    name\\n  }\\n  locations: shop {\\n    id\\n  }\\n}\"}"
+    },
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\":\"{\\n  locations(first: 10) {\\n    edges {\\n      node {\\n        id\\n        name\\n      }\\n    }\\n  }\\n  products(first: 100) {\\n    edges {\\n      node {\\n        id\\n        title\\n       ..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  products(first: 100) {\\n    edges {\\n      node {\\n        id\\n        title\\n        variants(first: 10) {\\n          edges {\\n            node {\\n              id\\n              title..."
+    }
+  ]
+}

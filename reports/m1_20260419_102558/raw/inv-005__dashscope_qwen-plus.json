@@ -1,0 +1,116 @@
+{
+  "case_id": "inv-005",
+  "category": "inventory_ops",
+  "question": "仓库 A 和仓库 B 的库存差异在哪些商品上最大？",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "inv-005",
+    "model": "dashscope:qwen-plus",
+    "category": "inventory_ops",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 44.27767276763916,
+    "total_tokens": 38444,
+    "tool_calls_count": 4,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 4,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用 query_store_data 获取 inventoryItems 及其 inventoryLevels（满足 '查询 inventoryLevels 并按 location 分组'）；虽仅发现一个跨仓商品，但仍准确计算了差值并排序（唯一项即最大差异，逻辑成立）；明确给出调拨建议（'可调拨 15 件过去平衡履约能力'），满足第三条。唯一小瑕疵：未显式说明‘按 location 分组’的实现方式（如 GraphQL 中对 inventoryLevels.edges.node.location.id 的聚合），但结果已隐含该操作；且将两个仓库硬编码为 'Shop location' 和 'My Custom Location' 而非用户指定的 '仓库 A/B'，属命名不一致但不影响实质分析。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 5,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"{ shop { locations(first: 10) { edges { node { id name } } } } }\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetInventoryLevels($first: Int!, $locationIds: [ID!]!) { inventoryItems(first: $first, query: \\\"tracked:true\\\") { edges { node { id sku variant { product { title handle } } inventoryLevels(first: 10, locationIds: $locationIds) { edges { node { location { id name } quantities(names: [\\\"available\\\"]) { quantity } } } } } } } } }\", \"variables\": {\"first\": 250, \"locationIds\": [\"gid://shopify/Location/107984093368\", \"gid://shopify/Location/107984060600\"]}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "GraphQL 语法错误：query 必须包含成对花括号且非空"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetInventoryLevels($locationIds: [ID!]!) { inventoryItems(first: 250, query: \\\"tracked:true\\\") { edges { node { id sku variant { product { title handle } } inventoryLevels(first: 10, locationIds: $locationIds) { edges { node { location { id name } quantities(names: [\\\"available\\\"]) { quantity } } } } } } } }\", \"variables\": {\"locationIds\": [\"gid://shopify/Location/107984093368\", \"gid://shopify/Location/107984060600\"]}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors: Field 'inventoryLevels' doesn't accept argument 'locationIds' | Variable $locationIds is declared by GetInventoryLevels but not used"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetInventoryWithLevels { inventoryItems(first: 250, query: \\\"tracked:true\\\") { edges { node { id sku variant { product { title handle } } inventoryLevels(first: 10) { edges { node { location { id name } quantities(names: [\\\"available\\\"]) { quantity } } } } } } } }\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:default] 按通用助手模式处理：先理解用户意图，再决定下一步行动。如果还需要更多数据，请继续调用 que",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 "
+    ],
+    "final_content": "我已成功拉取库存数据。关键发现：\n\n✅ 找到 **唯一一个在两个仓库（`Shop location` 和 `My Custom Location`）都有库存记录的 SKU**：  \n→ `inventoryItem.id = \"gid://shopify/InventoryItem/55427417473208\"`  \n→ 商品标题：**\"The Multi-location Snowboard\"**  \n→ `Shop location` 库存：**35**  \n→ `My Custom Location` 库存：**50**  \n→ **绝对差值 = |35 − 50| = 15**  \n\n其余所有 inventoryItems 仅出现在 **单个仓库**（绝大多数只在 `Shop location`），因此无法计算跨仓差异。\n\n⚠️ 注意：多个 SKU 显示负库存（如 -35、-26 等），表明已超卖，需紧急补货或下架。\n\n---\n\n### 🔍 差异最大商品（唯一可比项）\n**SKU**: —（未设 SKU）  \n**商品**: [The Multi-location Snowboard](/products/the-multi-location-snowboard)  \n**仓库差异**: `My Custom Location` 比 `Shop location` 多 **15 件**  \n→ 建议：若 `Shop location` 是主销仓，可调拨 15 件过去平衡履约能力。\n\n---\n\n### ⚠️ 高风险库存预警（需立即处理）\n- `The Inventory Not Tracked Snowboard`：`Shop location` 库存 **-35** → 超卖严重，暂停销售  \n- `Selling Plans Ski Wax`（3 个变体）：库存分别为 **-26, -21, -26** → 清库存优先级 ★★★  \n- `Gift Card`（4 个变体）：库存 **-29, -39, -24, -10** → 系统同步异常，检查 gift card 发放逻辑  \n- `The Out of Stock Snowboard`：库存 **-15** → 已售罄仍开放下单  \n\n需要我为你：  \n🔹 为超卖商品生成清仓促销（`create_promotion`）？  \n🔹 更新这些商品的库存为 0 并加标签 `\"urgent-review\"`？  \n🔹 或导出完整超卖清单供人工复核？\n\n请告诉我下一步动作。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 44.27767276763916,
+    "usage": {
+      "prompt_tokens": 36725,
+      "completion_tokens": 1719,
+      "total_tokens": 38444
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "我已成功拉取库存数据。关键发现：\n\n✅ 找到 **唯一一个在两个仓库（`Shop location` 和 `My Custom Location`）都有库存记录的 SKU**：  \n→ `inventoryItem.id = \"gid://shopify/InventoryItem/55427417473208\"`  \n→ 商品标题：**\"The Multi-location Snowboard\"**  \n→ `Shop location` 库存：**35**  \n→ `My Custom Location` 库存：**50**  \n→ **绝对差值 = |35 − 50| = 15**  \n\n其余所有 inventoryItems 仅出现在 **单个仓库**（绝大多数只在 `Shop location`），因此无法计算跨仓差异。\n\n⚠️ 注意：多个 SKU 显示负库存（如 -35、-26 等），表明已超卖，需紧急补货或下架。\n\n---\n\n### 🔍 差异最大商品（唯一可比项）\n**SKU**: —（未设 SKU）  \n**商品**: [The Multi-location Snowboard](/products/the-multi-location-snowboard)  \n**仓库差异**: `My Custom Location` 比 `Shop location` 多 **15 件**  \n→ 建议：若 `Shop location` 是主销仓，可调拨 15 件过去平衡履约能力。\n\n---\n\n### ⚠️ 高风险库存预警（需立即处理）\n- `The Inventory Not Tracked Snowboard`：`Shop location` 库存 **-35** → 超卖严重，暂停销售  \n- `Selling Plans Ski Wax`（3 个变体）：库存分别为 **-26, -21, -26** → 清库存优先级 ★★★  \n- `Gift Card`（4 个变体）：库存 **-29, -39, -24, -10** → 系统同步异常，检查 gift card 发放逻辑  \n- `The Out of Stock Snowboard`：库存 **-15** → 已售罄仍开放下单  \n\n需要我为你：  \n🔹 为超卖商品生成清仓促销（`create_promotion`）？  \n🔹 更新这些商品的库存为 0 并加标签 `\"urgent-review\"`？  \n🔹 或导出完整超卖清单供人工复核？\n\n请告诉我下一步动作。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"{ shop { locations(first: 10) { edges { node { id name } } } } }\"}"
+    },
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query GetInventoryLevels($first: Int!, $locationIds: [ID!]!) { inventoryItems(first: $first, query: \\\"tracked:true\\\") { edges { node { id sku variant { product { title handle } } inventoryL..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query GetInventoryLevels($locationIds: [ID!]!) { inventoryItems(first: 250, query: \\\"tracked:true\\\") { edges { node { id sku variant { product { title handle } } inventoryLevels(first: 10, ..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetInventoryWithLevels { inventoryItems(first: 250, query: \\\"tracked:true\\\") { edges { node { id sku variant { product { title handle } } inventoryLevels(first: 10) { edges { node { l..."
+    }
+  ]
+}

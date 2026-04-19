@@ -1,0 +1,129 @@
+{
+  "case_id": "sales-001",
+  "category": "sales_analytics",
+  "question": "上周订单数和总销售额是多少？",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "sales-001",
+    "model": "zhipu:glm-5",
+    "category": "sales_analytics",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 46.348796129226685,
+    "total_tokens": 45218,
+    "tool_calls_count": 5,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 3,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用了 query_store_data 工具，且最终回复给出了订单数与销售额两个数字，满足 rubric 第三条；时间范围在多次尝试中逐步收敛到 '2026-04-06 至 2026-04-12'（即上周日到周六），符合「上周」语义，满足第二条；但所有 GraphQL 查询均未显式过滤 financial_status:paid，而 rubric 明确要求查询 orders 的 totalPrice / createdAt 字段 *且* 应基于 paid 订单（因销售额通常只计已支付订单），首次调用虽含 financial_status:paid，但后续调用均缺失，最终回复未说明是否仅统计 paid 订单，存在关键逻辑偏差。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 6,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13 financial_status:paid\\\") {\\n    edges {\\n      node {\\n        id\\n        totalPrice\\n      }\\n    }\\n    pageInfo {\\n      hasNextPage\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13\\\") {\\n    edges {\\n      node {\\n        id\\n        name\\n        totalPrice\\n        displayFinancialStatus\\n      }\\n    }\\n    pageInfo {\\n      hasNextPage\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  orders(first: 10, sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        name\\n        createdAt\\n        totalPrice\\n        displayFinancialStatus\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-04-01 created_at:<2026-04-19\\\") {\\n    edges {\\n      node {\\n        id\\n        createdAt\\n        totalPrice\\n        displayFinancialStatus\\n      }\\n    }\\n    pageInfo {\\n      hasNextPage\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  orders(first: 10, sortKey: CREATED_AT, reverse: false) {\\n    edges {\\n      node {\\n        id\\n        name\\n        createdAt\\n        totalPrice\\n        displayFinancialStatus\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "## 上周订单数据\n\n**上周（2026-04-06 至 2026-04-12）订单数：0 单**  \n**总销售额：$0**\n\n---\n\n### 说明\n\n查询结果显示，上周没有任何订单记录。根据店铺数据，所有订单都是在 **2026-04-18**（今天）创建的，最早的订单是 #1001。\n\n这表明：\n- 店铺可能是新开设的，或\n- 上周确实没有交易发生\n\n如需查看本周或今天的订单数据，我可以帮你统计。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 46.348796129226685,
+    "usage": {
+      "prompt_tokens": 44010,
+      "completion_tokens": 1208,
+      "total_tokens": 45218
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "## 上周订单数据\n\n**上周（2026-04-06 至 2026-04-12）订单数：0 单**  \n**总销售额：$0**\n\n---\n\n### 说明\n\n查询结果显示，上周没有任何订单记录。根据店铺数据，所有订单都是在 **2026-04-18**（今天）创建的，最早的订单是 #1001。\n\n这表明：\n- 店铺可能是新开设的，或\n- 上周确实没有交易发生\n\n如需查看本周或今天的订单数据，我可以帮你统计。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13 financial_status:paid\\\") {\\n    edges {\\n      node {\\n        id\\n        totalPrice\\n      }\\n    }\\n    pag..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13\\\") {\\n    edges {\\n      node {\\n        id\\n        name\\n        totalPrice\\n        displayFinancialStatus\\..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  orders(first: 10, sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        name\\n        createdAt\\n        totalPrice\\n        displayFinancialStatus\\n    ..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-04-01 created_at:<2026-04-19\\\") {\\n    edges {\\n      node {\\n        id\\n        createdAt\\n        totalPrice\\n        displayFinancialSt..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  orders(first: 10, sortKey: CREATED_AT, reverse: false) {\\n    edges {\\n      node {\\n        id\\n        name\\n        createdAt\\n        totalPrice\\n        displayFinancialStatus\\n   ..."
+    }
+  ]
+}

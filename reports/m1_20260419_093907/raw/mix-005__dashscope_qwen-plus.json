@@ -1,0 +1,101 @@
+{
+  "case_id": "mix-005",
+  "category": "mixed_intent",
+  "question": "帮我看看 T 恤类目这周的销售表现，如果销量低于 10 件就启动 8 折促销。",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "mix-005",
+    "model": "dashscope:qwen-plus",
+    "category": "mixed_intent",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 22.628698110580444,
+    "total_tokens": 33861,
+    "tool_calls_count": 3,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 3,
+    "tool_selection_correct": false,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "工具调用未聚焦于 'T 恤'（含常见变体如 'T-shirt', 'tshirt'），而是错误地查询了更宽泛的 apparel/clothing/tops/shirts 类目，违背 rubric 中'按 productType=T 恤 查询'的要求；虽正确识别销量为0 < 10 并提出创建促销需确认，体现了条件触发逻辑，但因根本未查到 T 恤商品，无法验证是否真实销量低于10——可能因查询范围错误导致假阴性；未体现对 'T 恤' 多种拼写/空格/大小写（如 'T Shirt'、't shirt'）的鲁棒匹配，也未在无结果时回退检查 query_store_data 是否返回空或报错。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 4,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetTShirtSalesThisWeek { orders(first: 250, query: \\\"financial_status:paid created_at:>=2026-04-13 created_at:<2026-04-20\\\") { edges { node { id lineItems(first: 10) { edges { node { product { productType } quantity } } } } } } }\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetProductTypes { products(first: 100, query: \\\"product_type:T-shirt OR product_type:tshirt OR product_type:\\\\\\\"T Shirt\\\\\\\" OR product_type:\\\\\\\"t shirt\\\\\\\"\\\") { edges { node { id title productType } } } }\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetApparelProducts { products(first: 50, query: \\\"product_type:apparel OR product_type:clothing OR product_type:tops OR product_type:shirts\\\") { edges { node { id title productType tags } } } }\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1",
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1"
+    ],
+    "final_content": "我查询了更广泛的服装类目（apparel、clothing、tops、shirts），但仍然没有找到任何相关商品。\n\n这表明您的店铺中**当前可能没有上架任何T恤类商品**，因此本周T恤类目的销量为0件。\n\n根据您的要求：\"如果销量低于10件就启动8折促销\"，由于销量为0（确实低于10件），我们可以创建一个针对T恤类目的促销活动，为未来上架T恤商品做好准备。\n\n不过，在创建促销之前，我需要确认：\n- 您是否计划近期上架T恤商品？\n- 或者您希望我先帮您查找是否有其他类似的商品类别？\n\n另外，如果您确认要为T恤类目创建促销，我可以为您创建一个8折促销活动（折扣码），当您上架T恤商品时即可立即使用。\n\n请问您希望如何处理？",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 22.628698110580444,
+    "usage": {
+      "prompt_tokens": 33185,
+      "completion_tokens": 676,
+      "total_tokens": 33861
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "我查询了更广泛的服装类目（apparel、clothing、tops、shirts），但仍然没有找到任何相关商品。\n\n这表明您的店铺中**当前可能没有上架任何T恤类商品**，因此本周T恤类目的销量为0件。\n\n根据您的要求：\"如果销量低于10件就启动8折促销\"，由于销量为0（确实低于10件），我们可以创建一个针对T恤类目的促销活动，为未来上架T恤商品做好准备。\n\n不过，在创建促销之前，我需要确认：\n- 您是否计划近期上架T恤商品？\n- 或者您希望我先帮您查找是否有其他类似的商品类别？\n\n另外，如果您确认要为T恤类目创建促销，我可以为您创建一个8折促销活动（折扣码），当您上架T恤商品时即可立即使用。\n\n请问您希望如何处理？",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetTShirtSalesThisWeek { orders(first: 250, query: \\\"financial_status:paid created_at:>=2026-04-13 created_at:<2026-04-20\\\") { edges { node { id lineItems(first: 10) { edges { node { ..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetProductTypes { products(first: 100, query: \\\"product_type:T-shirt OR product_type:tshirt OR product_type:\\\\\\\"T Shirt\\\\\\\" OR product_type:\\\\\\\"t shirt\\\\\\\"\\\") { edges { node { id titl..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetApparelProducts { products(first: 50, query: \\\"product_type:apparel OR product_type:clothing OR product_type:tops OR product_type:shirts\\\") { edges { node { id title productType ta..."
+    }
+  ]
+}

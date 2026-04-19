@@ -1,0 +1,102 @@
+{
+  "case_id": "content-005",
+  "category": "content_generation",
+  "question": "给 T 恤类目的 5 个商品批量写一套统一风格的描述。",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "content-005",
+    "model": "zhipu:glm-5",
+    "category": "content_generation",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 43.06283211708069,
+    "total_tokens": 25585,
+    "tool_calls_count": 3,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 2,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用了 query_store_data 工具三次尝试检索 T 恤类目商品（含 product_type、tag/title 匹配、全量扫描），符合 rubric 中'是否查询到 T 恤类目下的商品'要求；但最终未生成任何商品描述，直接放弃任务，导致'是否保持一致风格'和'是否保留差异化卖点'两项完全未满足；虽主动提供替代方案（滑雪板描述），但 rubric 明确限定任务对象为'T 恤类目'，该响应偏离核心指令，属于关键维度失败。"
+  },
+  "trace": {
+    "task_type": "content_generation",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 4,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  products(first: 5, query: \\\"product_type:T-shirt\\\") {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        vendor\\n        descriptionHtml\\n        seo {\\n          title\\n          description\\n        }\\n        tags\\n        priceRangeV2 {\\n          minVariantPrice {\\n            amount\\n            currencyCode\\n          }\\n        }\\n        featuredImage {\\n          url\\n          altText\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  products(first: 5, query: \\\"tag:T-shirt OR tag:T恤 OR title:T-shirt OR title:T恤\\\") {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        vendor\\n        descriptionHtml\\n        seo {\\n          title\\n          description\\n        }\\n        tags\\n        priceRangeV2 {\\n          minVariantPrice {\\n            amount\\n            currencyCode\\n          }\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  products(first: 20) {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        tags\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1",
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1",
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1"
+    ],
+    "final_content": "抱歉，我查询了店铺的商品，目前没有找到 T 恤类目的商品。店铺现有的商品主要是滑雪板和配件类。\n\n**当前商品类目：**\n- 滑雪板- 14 个商品\n- 配件- 1 个商品  \n- 礼品卡- 1 个商品\n\n**我可以帮你：**\n\n1. **为现有滑雪板商品批量写描述** - 可以给 5 个滑雪板商品写统一风格的描述\n2. **等你添加 T 恤商品后再处理** - 如果你计划添加 T 恤商品，我可以之后再帮你批量写描述\n\n你希望我怎么处理？如果选择给滑雪板写描述，我可以先展示几个商品的现有内容，然后给你一个统一的风格方案。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 43.06283211708069,
+    "usage": {
+      "prompt_tokens": 24700,
+      "completion_tokens": 885,
+      "total_tokens": 25585
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "抱歉，我查询了店铺的商品，目前没有找到 T 恤类目的商品。店铺现有的商品主要是滑雪板和配件类。\n\n**当前商品类目：**\n- 滑雪板- 14 个商品\n- 配件- 1 个商品  \n- 礼品卡- 1 个商品\n\n**我可以帮你：**\n\n1. **为现有滑雪板商品批量写描述** - 可以给 5 个滑雪板商品写统一风格的描述\n2. **等你添加 T 恤商品后再处理** - 如果你计划添加 T 恤商品，我可以之后再帮你批量写描述\n\n你希望我怎么处理？如果选择给滑雪板写描述，我可以先展示几个商品的现有内容，然后给你一个统一的风格方案。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  products(first: 5, query: \\\"product_type:T-shirt\\\") {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        vendor\\n        descriptionHtml\\n        seo {\\..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  products(first: 5, query: \\\"tag:T-shirt OR tag:T恤 OR title:T-shirt OR title:T恤\\\") {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        vendor\\n        d..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  products(first: 20) {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        tags\\n      }\\n    }\\n  }\\n}\"}"
+    }
+  ]
+}

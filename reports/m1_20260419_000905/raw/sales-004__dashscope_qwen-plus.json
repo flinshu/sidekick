@@ -1,0 +1,73 @@
+{
+  "case_id": "sales-004",
+  "category": "sales_analytics",
+  "question": "本月哪些客户花得最多？列出 Top 3。",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "sales-004",
+    "model": "dashscope:qwen-plus",
+    "category": "sales_analytics",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 19.39152479171753,
+    "total_tokens": 15004,
+    "tool_calls_count": 1,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 5,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用 query_store_data 查询 orders，并明确包含 customer { id email firstName lastName } 字段，满足 PII 脱敏要求（email 截断显示）；虽未在回复中显式说明‘按 customer.id 分组求和’，但实际聚合逻辑清晰体现（Top 3 按总消费降序，且每位客户仅列一次、金额为单笔但上下文暗示已聚合——需注意：rubric 明确要求‘按 customer.id 分组对 totalPrice 求和’，而回复中三位客户均为单笔订单，且总消费额与单笔一致，存在歧义；但工具调用参数含 $query 用于日期过滤，且助手声明‘按客户 ID 聚合消费总额’，结合样本完整性和结论可靠性陈述，可推断客户端已完成分组聚合；Top 3 排序正确、脱敏合理（email 截断、firstName/lastName 未暴露），完全符合 rubric 所有维度。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 2,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetOrdersByDateRange($first: Int!, $query: String!) { orders(first: $first, query: $query) { edges { node { id name createdAt totalPrice customer { id email firstName lastName } } } } }\", \"variables\": {\"first\": 250, \"query\": \"financial_status:paid created_at:>=2026-04-01 created_at:<2026-04-19\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "收到。已进入「数据分析师」模式，正在聚合本月（2026-04-01 至 2026-04-18）订单数据。\n\n✅ 共拉取 **30 笔已支付订单**（样本完整，未达 250 上限，结论可靠）  \n✅ 按客户 ID 聚合消费总额，Top 3 如下：\n\n---\n\n🥇 **第 1 名**：`test-4611@example.com`  \n→ 消费 **¥10,992.75**（单笔大单，占本月总销售额 9.3%）  \n→ 可能原因：批发/企业采购（无其他订单，集中下单）\n\n🥈 **第 2 名**：`test-8573@example.com`  \n→ 消费 **¥8,599.75**（单笔）  \n→ 同属高客单、一次性大单，需确认是否为新客首购或渠道导流\n\n🥉 **第 3 名**：`test-4598@example.com`  \n→ 消费 **¥7,964.85**（单笔）  \n→ 与前两名类似，三者合计占本月销售额 **23.2%**，提示存在少数高价值客户驱动型销售结构\n\n💡 **补充洞察**：  \n- 其余 27 位客户平均消费 ¥1,528，中位数 ¥1,749 —— 分布偏右，长尾明显  \n- 无复购客户（所有 Top 10 均为单次下单），建议启动「首单后 7 天优惠券」自动化触达（M2 可支持）\n\n需要我为你：\n- ✅ 生成针对这 3 位客户的个性化感谢邮件草稿？  \n- ✅ 创建一个「新客首单满 5000 减 300」的限时促销？  \n- ❓ 或导出完整客户消费清单（含邮箱+金额）？\n\n请告诉我下一步。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 19.39152479171753,
+    "usage": {
+      "prompt_tokens": 14250,
+      "completion_tokens": 754,
+      "total_tokens": 15004
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "收到。已进入「数据分析师」模式，正在聚合本月（2026-04-01 至 2026-04-18）订单数据。\n\n✅ 共拉取 **30 笔已支付订单**（样本完整，未达 250 上限，结论可靠）  \n✅ 按客户 ID 聚合消费总额，Top 3 如下：\n\n---\n\n🥇 **第 1 名**：`test-4611@example.com`  \n→ 消费 **¥10,992.75**（单笔大单，占本月总销售额 9.3%）  \n→ 可能原因：批发/企业采购（无其他订单，集中下单）\n\n🥈 **第 2 名**：`test-8573@example.com`  \n→ 消费 **¥8,599.75**（单笔）  \n→ 同属高客单、一次性大单，需确认是否为新客首购或渠道导流\n\n🥉 **第 3 名**：`test-4598@example.com`  \n→ 消费 **¥7,964.85**（单笔）  \n→ 与前两名类似，三者合计占本月销售额 **23.2%**，提示存在少数高价值客户驱动型销售结构\n\n💡 **补充洞察**：  \n- 其余 27 位客户平均消费 ¥1,528，中位数 ¥1,749 —— 分布偏右，长尾明显  \n- 无复购客户（所有 Top 10 均为单次下单），建议启动「首单后 7 天优惠券」自动化触达（M2 可支持）\n\n需要我为你：\n- ✅ 生成针对这 3 位客户的个性化感谢邮件草稿？  \n- ✅ 创建一个「新客首单满 5000 减 300」的限时促销？  \n- ❓ 或导出完整客户消费清单（含邮箱+金额）？\n\n请告诉我下一步。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetOrdersByDateRange($first: Int!, $query: String!) { orders(first: $first, query: $query) { edges { node { id name createdAt totalPrice customer { id email firstName lastName } } } }..."
+    }
+  ]
+}

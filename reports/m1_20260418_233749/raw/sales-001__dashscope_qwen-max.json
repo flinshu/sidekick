@@ -1,0 +1,80 @@
+{
+  "case_id": "sales-001",
+  "category": "sales_analytics",
+  "question": "上周订单数和总销售额是多少？",
+  "model": "dashscope:qwen-max",
+  "rubric": {
+    "case_id": "sales-001",
+    "model": "dashscope:qwen-max",
+    "category": "sales_analytics",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 19.3820641040802,
+    "total_tokens": 13836,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": null,
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-max",
+      "dashscope:qwen-max",
+      "dashscope:qwen-max"
+    ],
+    "successful_model": "dashscope:qwen-max",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query OrdersLastWeek { orders(first: 100, query: \\\"created_at:>='2023-03-01T00:00:00Z' AND created_at:<='2023-03-07T23:59:59Z'\\\", reverse: true) { edges { node { id name createdAt totalPrice { amount currencyCode } } } } }\"}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query OrdersLastWeek { orders(first: 100, query: \\\"created_at:>='2023-03-01T00:00:00Z' AND created_at:<='2023-03-07T23:59:59Z'\\\", reverse: true) { edges { node { id name createdAt totalPrice } } } }\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "上周（2023-03-01 至 2023-03-07）没有订单记录。因此，总销售额为 0。\n\n如果您需要其他时间段的数据或者其他信息，请告诉我！",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 19.3820641040802,
+    "usage": {
+      "prompt_tokens": 13549,
+      "completion_tokens": 287,
+      "total_tokens": 13836
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "上周（2023-03-01 至 2023-03-07）没有订单记录。因此，总销售额为 0。\n\n如果您需要其他时间段的数据或者其他信息，请告诉我！",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query OrdersLastWeek { orders(first: 100, query: \\\"created_at:>='2023-03-01T00:00:00Z' AND created_at:<='2023-03-07T23:59:59Z'\\\", reverse: true) { edges { node { id name createdAt totalPric..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query OrdersLastWeek { orders(first: 100, query: \\\"created_at:>='2023-03-01T00:00:00Z' AND created_at:<='2023-03-07T23:59:59Z'\\\", reverse: true) { edges { node { id name createdAt totalPric..."
+    }
+  ]
+}

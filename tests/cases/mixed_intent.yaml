@@ -1,0 +1,67 @@
+category: mixed_intent
+task_type: analysis
+cases:
+  - id: mix-001
+    question: "上周销量下滑的商品有哪些？给这些商品各写一个促销文案。"
+    expected:
+      tools_must_include: [query_store_data]
+      jit_category: [analytics_sales, content_creator]
+      min_tool_calls: 2
+    rubric:
+      - "是否先调用 query_store_data 查销售数据，完成分析"
+      - "是否切换到「内容创作者」模式生成促销文案（JIT 指令切换）"
+      - "分析指令和内容创作指令是否互相冲突（应该不冲突）"
+      - "最终输出是否包含「下滑商品列表 + 每个商品的文案」两部分"
+
+  - id: mix-002
+    question: "库存过剩 30 天的商品，帮我创建一个 5 折促销活动。"
+    expected:
+      tools_must_include: [query_store_data, create_promotion]
+      jit_category: [inventory_ops, promotion_design]
+      min_tool_calls: 2
+      requires_confirmation: true
+    rubric:
+      - "是否先查库存 + 订单数据识别积压商品"
+      - "是否切换到「促销设计」模式"
+      - "是否调用 create_promotion 并触发确认流程"
+      - "5 折（percentage_off=50）是否正确传给工具"
+
+  - id: mix-003
+    question: "哪些客户最近 30 天没下单但之前花费超过 100 美元？给他们发个召回折扣。"
+    expected:
+      tools_must_include: [query_store_data, create_promotion]
+      jit_category: [customer_insights, promotion_design]
+      min_tool_calls: 2
+      requires_confirmation: true
+    rubric:
+      - "是否先查客户 + 订单数据识别流失客户"
+      - "是否按 amountSpent > 100 过滤"
+      - "折扣码的设计是否体现「召回」用途"
+      - "PII 呈现是否合理（聚合 / 脱敏）"
+
+  - id: mix-004
+    question: "低库存商品里选 3 个，把它们的 SEO 描述改得更吸引人，并且加一个补货提醒的 tag。"
+    expected:
+      tools_must_include: [query_store_data, save_content]
+      jit_category: [inventory_ops, content_creator]
+      min_tool_calls: 4  # 查库存 + 各商品 save_content
+      requires_confirmation: true
+    rubric:
+      - "是否先识别低库存商品（inventory_ops 模式）"
+      - "是否为每个商品调用 save_content（内容创作者模式）"
+      - "SEO description 是否 ≤ 160 字符"
+      - "是否加了「补货提醒」类 tag"
+      - "每次写操作是否都返回 preview 等确认"
+
+  - id: mix-005
+    question: "帮我看看 T 恤类目这周的销售表现，如果销量低于 10 件就启动 8 折促销。"
+    expected:
+      tools_must_include: [query_store_data]
+      jit_category: [analytics_sales, promotion_design]
+      min_tool_calls: 1
+    rubric:
+      - "是否按 productType=T 恤 查询 orders + lineItems"
+      - "是否正确判断阈值（销量 < 10 才触发）"
+      - "如果销量 ≥ 10，是否明确说明「无需促销」而非直接创建"
+      - "如果销量 < 10，是否调用 create_promotion 并要求确认"
+      - "是否体现「条件触发」的逻辑（非无脑执行）"

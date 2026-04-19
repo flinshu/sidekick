@@ -1,0 +1,115 @@
+{
+  "case_id": "inv-004",
+  "category": "inventory_ops",
+  "question": "把 The Minimal Snowboard 的库存增加 5 件。",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "inv-004",
+    "model": "dashscope:qwen-plus",
+    "category": "inventory_ops",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 19.798558950424194,
+    "total_tokens": 31465,
+    "tool_calls_count": 4,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 3,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": false,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用了 query_store_data 查找商品 variant 和 inventoryItem（第一、三步），也调用了 update_inventory（第四步），满足前两个 rubric 条目；但违反了第三条：rubric 明确要求‘返回 preview 并要求用户确认，没直接执行’，而工具调用记录显示 update_inventory 已成功执行（ok: true），说明助手在用户确认前就已执行操作，未遵守 JIT 确认流程。因此 jit_instruction_followed 为 false，整体质量降为 3 分。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 5,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query($query: String!) { products(first: 1, query: $query) { edges { node { id title variants(first: 1) { edges { node { id sku inventoryQuantity inventoryItem { id } } } } } } } }\", \"variables\": {\"query\": \"title:\\\\\\\"The Minimal Snowboard\\\\\\\"\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query($inventoryItemId: ID!) { inventoryItem(id: $inventoryItemId) { id tracked inventoryLevels(first: 10) { edges { node { id available location { id name } } } } } }\", \"variables\": {\"inventoryItemId\": \"gid://shopify/InventoryItem/55427416719544\"}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors: Field 'available' doesn't exist on type 'InventoryLevel'"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query($inventoryItemId: ID!) { inventoryItem(id: $inventoryItemId) { id tracked inventoryLevels(first: 10) { edges { node { id quantities(names: [\\\"available\\\"]) { name quantity } location { id name } } } } } }\", \"variables\": {\"inventoryItemId\": \"gid://shopify/InventoryItem/55427416719544\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "update_inventory",
+        "arguments": "{\"inventory_item_id\": \"gid://shopify/InventoryItem/55427416719544\", \"location_id\": \"gid://shopify/Location/107984060600\", \"delta\": 5, \"reason\": \"增加库存\"}",
+        "ok": true,
+        "requires_confirmation": true,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:write_confirmation] 此操作不可撤销。在真正调用 Shopify 之前，你必须把 previ"
+    ],
+    "final_content": "✅ **操作确认卡**\n\n**库存调整预览**\n- 商品：The Minimal Snowboard\n- 当前库存：15件 → 调整后：20件（+5件）\n- 位置：Shop location\n- 原因：增加库存\n\n请确认是否执行此库存调整操作？  \n如需确认，请回复\"确认\"；如需取消，请回复\"取消\"。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 19.798558950424194,
+    "usage": {
+      "prompt_tokens": 30855,
+      "completion_tokens": 610,
+      "total_tokens": 31465
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "✅ **操作确认卡**\n\n**库存调整预览**\n- 商品：The Minimal Snowboard\n- 当前库存：15件 → 调整后：20件（+5件）\n- 位置：Shop location\n- 原因：增加库存\n\n请确认是否执行此库存调整操作？  \n如需确认，请回复\"确认\"；如需取消，请回复\"取消\"。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query($query: String!) { products(first: 1, query: $query) { edges { node { id title variants(first: 1) { edges { node { id sku inventoryQuantity inventoryItem { id } } } } } } } }\", \"varia..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query($inventoryItemId: ID!) { inventoryItem(id: $inventoryItemId) { id tracked inventoryLevels(first: 10) { edges { node { id available location { id name } } } } } }\", \"variables\": {\"inve..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query($inventoryItemId: ID!) { inventoryItem(id: $inventoryItemId) { id tracked inventoryLevels(first: 10) { edges { node { id quantities(names: [\\\"available\\\"]) { name quantity } location ..."
+    },
+    {
+      "name": "update_inventory",
+      "ok": true,
+      "args_preview": "{\"inventory_item_id\": \"gid://shopify/InventoryItem/55427416719544\", \"location_id\": \"gid://shopify/Location/107984060600\", \"delta\": 5, \"reason\": \"增加库存\"}"
+    }
+  ]
+}

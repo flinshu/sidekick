@@ -1,0 +1,88 @@
+{
+  "case_id": "mix-005",
+  "category": "mixed_intent",
+  "question": "帮我看看 T 恤类目这周的销售表现，如果销量低于 10 件就启动 8 折促销。",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "mix-005",
+    "model": "dashscope:qwen-plus",
+    "category": "mixed_intent",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 14.58204698562622,
+    "total_tokens": 24898,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 3,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确选择了 query_store_data 工具并构造了针对 T-Shirt 类目的 orders 和 products 查询，满足 rubric 中‘按 productType=T 恤查询’的要求；也体现了条件触发逻辑（先查销量/商品存在性，再判断是否促销）；但 rubric 明确要求‘销量 < 10 就启动 8 折促销’，而助手因发现无商品直接跳过 create_promotion 调用，且未说明‘若上架后销量仍<10则应启动促销’，也未对‘销量=0 < 10’这一事实触发促销确认流程，违反‘销量 < 10 就调用 create_promotion 并要求确认’这一关键条目；同时未明确说‘无需促销’（因无商品，本就不适用），但 rubric 要求的是销量≥10时才说无需促销，此处不适用该分支，故此项不扣分。主要失分在于未执行或提议执行促销动作，违背条件触发的执行闭环。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetTShirtSalesThisWeek { orders(first: 250, query: \\\"financial_status:paid created_at:>=2026-04-13 created_at:<2026-04-20 product_type:T-Shirt\\\") { edges { node { id totalPrice lineItems(first: 10) { edges { node { product { productType title } quantity } } } } } } }\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query CheckTShirtProducts { products(first: 10, query: \\\"product_type:T-Shirt\\\") { edges { node { id title productType status totalInventory } } } }\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 "
+    ],
+    "final_content": "我检查了店铺中 T 恤（T-Shirt）类目的商品，发现当前**没有任何 T 恤类目的商品**在售（products 查询返回空结果）。\n\n这意味着：\n- 店铺目前没有上架任何 T 恤商品\n- 因此本周 T 恤类目销量为 0 件（低于 10 件的阈值）\n- 无法为不存在的商品启动促销活动\n\n建议：\n✅ 立即上架 T 恤类目商品，填补品类空白\n✅ 可以先创建几款基础款 T 恤，测试市场反应\n✅ 上架后我可以帮您分析销售表现并设置促销策略\n\n您希望我帮您：\n1. 创建新的 T 恤商品？\n2. 分析其他热销类目（如 snowboard、accessories）的表现？\n3. 或者有其他运营需求？\n\n请告诉我您的下一步计划。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 14.58204698562622,
+    "usage": {
+      "prompt_tokens": 24404,
+      "completion_tokens": 494,
+      "total_tokens": 24898
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "我检查了店铺中 T 恤（T-Shirt）类目的商品，发现当前**没有任何 T 恤类目的商品**在售（products 查询返回空结果）。\n\n这意味着：\n- 店铺目前没有上架任何 T 恤商品\n- 因此本周 T 恤类目销量为 0 件（低于 10 件的阈值）\n- 无法为不存在的商品启动促销活动\n\n建议：\n✅ 立即上架 T 恤类目商品，填补品类空白\n✅ 可以先创建几款基础款 T 恤，测试市场反应\n✅ 上架后我可以帮您分析销售表现并设置促销策略\n\n您希望我帮您：\n1. 创建新的 T 恤商品？\n2. 分析其他热销类目（如 snowboard、accessories）的表现？\n3. 或者有其他运营需求？\n\n请告诉我您的下一步计划。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetTShirtSalesThisWeek { orders(first: 250, query: \\\"financial_status:paid created_at:>=2026-04-13 created_at:<2026-04-20 product_type:T-Shirt\\\") { edges { node { id totalPrice lineIt..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query CheckTShirtProducts { products(first: 10, query: \\\"product_type:T-Shirt\\\") { edges { node { id title productType status totalInventory } } } }\"}"
+    }
+  ]
+}

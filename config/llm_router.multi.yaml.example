@@ -1,0 +1,42 @@
+# 多 provider 版本示例：等 Anthropic / OpenAI key 就位后，把此文件改名为 llm_router.yaml
+
+default_task_type: analysis
+
+routes:
+  analysis:
+    primary: anthropic:claude-sonnet-4-5
+    fallbacks:
+      - openai:gpt-4o
+      - dashscope:qwen-max
+
+  content_generation:
+    primary: openai:gpt-4o
+    fallbacks:
+      - anthropic:claude-sonnet-4-5
+      - dashscope:qwen-max
+
+  intent:
+    primary: openai:gpt-4o-mini
+    fallbacks:
+      - anthropic:claude-haiku-4-5
+      - dashscope:qwen-turbo
+
+  chinese_merchant:
+    primary: dashscope:qwen-max
+    fallbacks:
+      - anthropic:claude-sonnet-4-5
+      - openai:gpt-4o
+
+  strategy:
+    primary: anthropic:claude-opus-4-7
+    fallbacks:
+      - openai:gpt-5
+      - anthropic:claude-sonnet-4-5
+
+generation:
+  max_tokens: 4096
+  temperature: 0.3
+
+agent:
+  max_iterations: 10
+  max_retries_per_call: 3

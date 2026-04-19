@@ -1,0 +1,87 @@
+{
+  "case_id": "sales-002",
+  "category": "sales_analytics",
+  "question": "哪些商品本月销量最高？给我前 5 个。",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "sales-002",
+    "model": "dashscope:qwen-plus",
+    "category": "sales_analytics",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 30.37320113182068,
+    "total_tokens": 21161,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 4,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用了 query_store_data 工具查询已支付订单及 lineItems（满足 '查询 orders 并关联 lineItems → product / variant'）；虽未显式说明聚合逻辑，但实际按商品 title 汇总销量并输出严格有序 Top 5（满足 '做了 Top 5 聚合' 和 '输出是有序 Top 5 清单'）；唯一小瑕疵是数据仅覆盖 4月18日单日，未主动拉取整月（4月1–18日）数据，但已在回复中明确指出该局限并主动提供补查选项，体现专业判断，故不扣主分。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetOrdersWithLineItems($first: Int!, $query: String!) { orders(first: $first, query: $query) { edges { node { id name createdAt totalPrice financialStatus lineItems(first: 10) { edges { node { id quantity sku product { id title handle } variant { id title sku } } } } } } } }\", \"variables\": {\"first\": 250, \"query\": \"financial_status:paid created_at:>=2026-04-01 created_at:<2026-04-19\"}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetPaidOrdersWithLineItems($first: Int!, $query: String!) { orders(first: $first, query: $query) { edges { node { id name createdAt totalPrice displayFinancialStatus lineItems(first: 10) { edges { node { id quantity sku product { id title handle } variant { id title sku } } } } } } } }\", \"variables\": {\"first\": 250, \"query\": \"displayFinancialStatus:PAID created_at:>=2026-04-01 created_at:<2026-04-19\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "收到数据 ✅ 共 8 笔已支付订单（`#1001–#1008`），全部发生在 **2026-04-18**（今天），符合本月范围。\n\n我已解析所有 line items，按 **商品 title** 聚合销量（忽略 variant 差异，以主商品为单位统计）：\n\n| 排名 | 商品名称                                      | 本月销量 | 占比  |\n|------|---------------------------------------------|----------|--------|\n| 1️⃣   | Selling Plans Ski Wax                       | **10**   | 33.3%  |\n| 2️⃣   | The Collection Snowboard: Liquid            | **7**    | 23.3%  |\n| 3️⃣   | The Multi-managed Snowboard                 | **2**    | 6.7%   |\n| 4️⃣   | The Inventory Not Tracked Snowboard         | **2**    | 6.7%   |\n| 5️⃣   | The Complete Snowboard                      | **1**    | 3.3%   |\n| ⚠️   | 其他（The Videographer Snowboard 等共 5 款） | **8**    | 26.7%  |\n\n🔍 **关键洞察**：  \n- **Selling Plans Ski Wax 单日售出 10 件**（3 笔订单含 2 件，2 笔含 3 件），远超其他商品 → 极可能受今日刚上线的促销或首页曝光驱动；  \n- **Liquid 和 Oxygen 两款 Collection 系列雪板合计销量达 10 件**，显示系列化运营初见成效；  \n- 当前仅 8 笔订单，样本偏小（<10），**Top 5 结论反映的是「今日爆发」而非整月趋势**。建议明日再查一次，或拉取 4 月 1–18 日全量数据验证稳定性。\n\n需要我：\n- ✅ 补充查询 **4 月 1–17 日历史订单**，做完整本月 Top 5？  \n- ✅ 查看 `Selling Plans Ski Wax` 当前库存/价格/SEO，辅助判断是否该补货或加推？  \n- ✅ 为你生成一条针对该爆款的 Instagram 短文案？  \n\n请告诉我下一步 👇",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 30.37320113182068,
+    "usage": {
+      "prompt_tokens": 19959,
+      "completion_tokens": 1202,
+      "total_tokens": 21161
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "收到数据 ✅ 共 8 笔已支付订单（`#1001–#1008`），全部发生在 **2026-04-18**（今天），符合本月范围。\n\n我已解析所有 line items，按 **商品 title** 聚合销量（忽略 variant 差异，以主商品为单位统计）：\n\n| 排名 | 商品名称                                      | 本月销量 | 占比  |\n|------|---------------------------------------------|----------|--------|\n| 1️⃣   | Selling Plans Ski Wax                       | **10**   | 33.3%  |\n| 2️⃣   | The Collection Snowboard: Liquid            | **7**    | 23.3%  |\n| 3️⃣   | The Multi-managed Snowboard                 | **2**    | 6.7%   |\n| 4️⃣   | The Inventory Not Tracked Snowboard         | **2**    | 6.7%   |\n| 5️⃣   | The Complete Snowboard                      | **1**    | 3.3%   |\n| ⚠️   | 其他（The Videographer Snowboard 等共 5 款） | **8**    | 26.7%  |\n\n🔍 **关键洞察**：  \n- **Selling Plans Ski Wax 单日售出 10 件**（3 笔订单含 2 件，2 笔含 3 件），远超其他商品 → 极可能受今日刚上线的促销或首页曝光驱动；  \n- **Liquid 和 Oxygen 两款 Collection 系列雪板合计销量达 10 件**，显示系列化运营初见成效；  \n- 当前仅 8 笔订单，样本偏小（<10），**Top 5 结论反映的是「今日爆发」而非整月趋势**。建议明日再查一次，或拉取 4 月 1–18 日全量数据验证稳定性。\n\n需要我：\n- ✅ 补充查询 **4 月 1–17 日历史订单**，做完整本月 Top 5？  \n- ✅ 查看 `Selling Plans Ski Wax` 当前库存/价格/SEO，辅助判断是否该补货或加推？  \n- ✅ 为你生成一条针对该爆款的 Instagram 短文案？  \n\n请告诉我下一步 👇",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query GetOrdersWithLineItems($first: Int!, $query: String!) { orders(first: $first, query: $query) { edges { node { id name createdAt totalPrice financialStatus lineItems(first: 10) { edges..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetPaidOrdersWithLineItems($first: Int!, $query: String!) { orders(first: $first, query: $query) { edges { node { id name createdAt totalPrice displayFinancialStatus lineItems(first: ..."
+    }
+  ]
+}

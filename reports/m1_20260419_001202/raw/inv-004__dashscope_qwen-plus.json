@@ -1,0 +1,132 @@
+{
+  "case_id": "inv-004",
+  "category": "inventory_ops",
+  "question": "把 SKU SKU-TSHIRT-RED-M 的库存从 10 件调到 20 件。",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "inv-004",
+    "model": "dashscope:qwen-plus",
+    "category": "inventory_ops",
+    "tool_selection_accuracy": false,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": false,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 23.049181938171387,
+    "total_tokens": 40414,
+    "tool_calls_count": 5,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [
+      "缺失工具：['update_inventory']，实际调用：['query_store_data', 'query_store_data', 'query_store_data', 'query_store_data', 'query_store_data']",
+      "期望触发写操作但实际未调用任何写工具"
+    ],
+    "hard_pass": false
+  },
+  "judge": {
+    "overall": 2,
+    "tool_selection_correct": false,
+    "jit_instruction_followed": false,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手未按 rubric 要求先查询 SKU-TSHIRT-RED-M 的 inventoryItem/当前库存（所有 query_store_data 调用均未成功返回该 SKU，且最终回复承认未找到）；未调用 update_inventory 工具；未返回 preview 或要求用户确认调整操作，而是转向质疑 SKU 正确性并请求额外信息。完全违背了‘先查、再预览、后确认’的核心流程。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 6,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query($sku: String!) { products(first: 1, query: \\\\\\\"sku:$sku\\\\\\\") { edges { node { variants(first: 1) { edges { node { id sku inventoryItem { id } } } } } } } }\", \"variables\": {\"sku\": \"SKU-TSHIRT-RED-M\"}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query($sku: String!) { products(first: 10, query: \\\\\\\"sku:$sku\\\\\\\") { edges { node { variants(first: 10) { edges { node { id sku inventoryQuantity inventoryItem { id } } } } } } } }\", \"variables\": {\"sku\": \"SKU-TSHIRT-RED-M\"}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query FindProductBySku($sku: String!) { products(first: 10, query: $sku) { edges { node { id title variants(first: 10) { edges { node { id sku inventoryQuantity inventoryItem { id } } } } } } } }\", \"variables\": {\"sku\": \"SKU-TSHIRT-RED-M\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query { products(first: 50) { edges { node { id title variants(first: 10) { edges { node { id sku inventoryQuantity inventoryItem { id } } } } } } } }\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query { shop { locations(first: 10) { edges { node { id name } } } } }\"}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors"
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:default] 按通用助手模式处理：先理解用户意图，再决定下一步行动。如果还需要更多数据，请继续调用 que"
+    ],
+    "final_content": "看起来我没有足够的权限查询位置信息。让我尝试查找是否有其他方式获取库存调整所需的信息。\n\n由于我无法找到指定的 SKU，我需要向您确认：\n\n1. **SKU 是否正确？** 在我的查询结果中，我只看到了 `sku-untracked-1`、`sku-managed-1` 和 `sku-hosted-1` 这几个 SKU，没有 `SKU-TSHIRT-RED-M`。\n\n2. **是否可能是其他 SKU？** 您能否确认这个 SKU 是否存在于您的店铺中？或者是否可能是拼写错误？\n\n3. **替代方案：** 如果您能提供商品的 ID 或变体 ID，我可以直接使用那个 ID 来调整库存。\n\n在等待您确认的同时，让我检查一下是否有其他相关的信息可以帮助定位这个 SKU。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 23.049181938171387,
+    "usage": {
+      "prompt_tokens": 39681,
+      "completion_tokens": 733,
+      "total_tokens": 40414
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "看起来我没有足够的权限查询位置信息。让我尝试查找是否有其他方式获取库存调整所需的信息。\n\n由于我无法找到指定的 SKU，我需要向您确认：\n\n1. **SKU 是否正确？** 在我的查询结果中，我只看到了 `sku-untracked-1`、`sku-managed-1` 和 `sku-hosted-1` 这几个 SKU，没有 `SKU-TSHIRT-RED-M`。\n\n2. **是否可能是其他 SKU？** 您能否确认这个 SKU 是否存在于您的店铺中？或者是否可能是拼写错误？\n\n3. **替代方案：** 如果您能提供商品的 ID 或变体 ID，我可以直接使用那个 ID 来调整库存。\n\n在等待您确认的同时，让我检查一下是否有其他相关的信息可以帮助定位这个 SKU。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query($sku: String!) { products(first: 1, query: \\\\\\\"sku:$sku\\\\\\\") { edges { node { variants(first: 1) { edges { node { id sku inventoryItem { id } } } } } } } }\", \"variables\": {\"sku\": \"SKU..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query($sku: String!) { products(first: 10, query: \\\\\\\"sku:$sku\\\\\\\") { edges { node { variants(first: 10) { edges { node { id sku inventoryQuantity inventoryItem { id } } } } } } } }\", \"vari..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query FindProductBySku($sku: String!) { products(first: 10, query: $sku) { edges { node { id title variants(first: 10) { edges { node { id sku inventoryQuantity inventoryItem { id } } } } }..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query { products(first: 50) { edges { node { id title variants(first: 10) { edges { node { id sku inventoryQuantity inventoryItem { id } } } } } } } }\"}"
+    },
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query { shop { locations(first: 10) { edges { node { id name } } } } }\"}"
+    }
+  ]
+}

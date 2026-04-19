@@ -1,0 +1,130 @@
+{
+  "case_id": "mix-002",
+  "category": "mixed_intent",
+  "question": "库存过剩 30 天的商品，帮我创建一个 5 折促销活动。",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "mix-002",
+    "model": "dashscope:qwen-plus",
+    "category": "mixed_intent",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 56.309324979782104,
+    "total_tokens": 68513,
+    "tool_calls_count": 5,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 5,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确执行了全部 rubric 要求：先通过 query_store_data 多次调用（含订单与库存查询）识别积压商品；在最终回复中明确采用促销设计语境（操作确认卡、折扣码、生效时间等要素完整）；成功调用 create_promotion 工具且 percentage_off=50 精确传入；整个流程符合「库存过剩30天→创建5折促销」的混合意图，无遗漏或错位。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 6,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetRecentOrders($after: String) { orders(first: 250, after: $after, query: \\\"financial_status:paid created_at:>=2026-03-20\\\", sortKey: CREATED_AT, reverse: true) { edges { node { id lineItems(first: 10) { edges { node { product { id } } } } } } pageInfo { hasNextPage endCursor } } }\", \"variables\": {}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetInventoryProducts($after: String) { products(first: 250, after: $after, query: \\\"status:active total_inventory:>0\\\", sortKey: TOTAL_INVENTORY, reverse: true) { edges { node { id title totalInventory variants(first: 1) { edges { node { inventoryQuantity } } } } } pageInfo { hasNextPage endCursor } } }\", \"variables\": {}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors: Argument 'sortKey' on Field 'products' has an invalid value (TOTAL_INVENTORY). Expected type 'ProductSortKeys'."
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetInventoryProducts($after: String) { products(first: 250, after: $after, query: \\\"status:active total_inventory:>0\\\", sortKey: UPDATED_AT, reverse: true) { edges { node { id title totalInventory variants(first: 1) { edges { node { inventoryQuantity } } } } } pageInfo { hasNextPage endCursor } } }\", \"variables\": {}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetProductDetails($ids: [ID!]!) { nodes(ids: $ids) { ... on Product { id title totalInventory variants(first: 1) { edges { node { inventoryQuantity price compareAtPrice } } } } } }\", \"variables\": {\"ids\": [\"gid://shopify/Product/10373912101048\", \"gid://shopify/Product/10373912133816\", \"gid://shopify/Product/10373912199352\", \"gid://shopify/Product/10373912035512\"]}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "create_promotion",
+        "arguments": "{\"title\": \"库存清仓：The Multi-location Snowboard 5折特惠\", \"discount_code\": \"MULTI50\", \"percentage_off\": 50, \"starts_at\": \"2026-04-19T00:00:00Z\"}",
+        "ok": true,
+        "requires_confirmation": true,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:write_confirmation] 此操作不可撤销。在真正调用 Shopify 之前，你必须把 previ"
+    ],
+    "final_content": "✅ **操作确认卡**\n\n**即将创建促销活动：**\n- 🎯 商品：The Multi-location Snowboard（库存85件，近期销售较慢）\n- 💰 优惠：5折特惠（原价$729.95 → $364.98）\n- 🏷️ 折扣码：`MULTI50`\n- ⏰ 生效时间：立即开始（2026-04-19）\n\n**影响：** 折扣码将立即生效，顾客结账时可使用。\n\n请回复\"确认\"以创建此促销，或\"取消\"中止操作。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 56.309324979782104,
+    "usage": {
+      "prompt_tokens": 66354,
+      "completion_tokens": 2159,
+      "total_tokens": 68513
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "✅ **操作确认卡**\n\n**即将创建促销活动：**\n- 🎯 商品：The Multi-location Snowboard（库存85件，近期销售较慢）\n- 💰 优惠：5折特惠（原价$729.95 → $364.98）\n- 🏷️ 折扣码：`MULTI50`\n- ⏰ 生效时间：立即开始（2026-04-19）\n\n**影响：** 折扣码将立即生效，顾客结账时可使用。\n\n请回复\"确认\"以创建此促销，或\"取消\"中止操作。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetRecentOrders($after: String) { orders(first: 250, after: $after, query: \\\"financial_status:paid created_at:>=2026-03-20\\\", sortKey: CREATED_AT, reverse: true) { edges { node { id l..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query GetInventoryProducts($after: String) { products(first: 250, after: $after, query: \\\"status:active total_inventory:>0\\\", sortKey: TOTAL_INVENTORY, reverse: true) { edges { node { id ti..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetInventoryProducts($after: String) { products(first: 250, after: $after, query: \\\"status:active total_inventory:>0\\\", sortKey: UPDATED_AT, reverse: true) { edges { node { id title t..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetProductDetails($ids: [ID!]!) { nodes(ids: $ids) { ... on Product { id title totalInventory variants(first: 1) { edges { node { inventoryQuantity price compareAtPrice } } } } } }\", ..."
+    },
+    {
+      "name": "create_promotion",
+      "ok": true,
+      "args_preview": "{\"title\": \"库存清仓：The Multi-location Snowboard 5折特惠\", \"discount_code\": \"MULTI50\", \"percentage_off\": 50, \"starts_at\": \"2026-04-19T00:00:00Z\"}"
+    }
+  ]
+}

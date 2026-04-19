@@ -1,0 +1,88 @@
+{
+  "case_id": "inv-005",
+  "category": "inventory_ops",
+  "question": "仓库 A 和仓库 B 的库存差异在哪些商品上最大？",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "inv-005",
+    "model": "zhipu:glm-5",
+    "category": "inventory_ops",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 39.46661591529846,
+    "total_tokens": 21359,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 4,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用了 query_store_data 工具查询 locations 和 inventoryItems，隐含实现了按 location 分组和计算差值（通过对比两仓库库存得出差异列），并排序展示了 Top 10 差异商品；跨仓调拨建议明确（如从主仓调拨至空仓），且补充了负库存等业务洞察；唯一小瑕疵是未显式说明‘按 location 分组聚合’的计算逻辑，但表格数据和结论已实质性满足 rubric 所有三项要求。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  shop {\\n    locations(first: 10) {\\n      edges {\\n        node {\\n          id\\n          name\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  inventoryItems(first: 100) {\\n    edges {\\n      node {\\n        id\\n        sku\\n        variant {\\n          id\\n          title\\n          product {\\n            id\\n            title\\n          }\\n        }\\n        inventoryLevels(first: 10) {\\n          edges {\\n            node {\\n              location {\\n                id\\n                name\\n              }\\n              quantities(names: [\\\"available\\\"]) {\\n                quantity\\n              }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:default] 按通用助手模式处理：先理解用户意图，再决定下一步行动。如果还需要更多数据，请继续调用 que",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 "
+    ],
+    "final_content": "根据查询结果，我发现了一个重要情况：\n\n## 📍 仓库现状\n\n你的店铺有两个仓库：\n- **Shop location** (主仓库)\n- **My Custom Location** (自定义仓库)\n\n但 **My Custom Location 目前没有任何库存记录**，所有商品库存都集中在 Shop location。\n\n## 📊 库存差异最大的商品（Top 10）\n\n由于 My Custom Location 库存为 0，差异 = Shop location 库存数量：\n\n| 商品名称 | Shop location | My Custom Location | 差异 |\n|---------|--------------|-------------------|------|\n| The Archived Snowboard | 50 | 0 | **50** |\n| The Draft Snowboard | 20 | 0 | **20** |\n| The Collection Snowboard: Hydrogen | 16 | 0 | **16** |\n| The Minimal Snowboard | 15 | 0 | **15** |\n| The Videographer Snowboard | 11 | 0 | **11** |\n| Gift Card ($100) | -10 | 0 | **-10** |\n| Gift Card ($50) | -24 | 0 | **-24** |\n| Gift Card ($25) | -39 | 0 | **-39** |\n| Gift Card ($10) | -29 | 0 | **-29** |\n\n## 💡 建议\n\n1. **如果 My Custom Location 是新仓库**：需要从 Shop location 调拨库存过去\n2. **如果 My Custom Location 已停用**：可以考虑在系统中删除该仓库位置\n3. **负库存商品**：Gift Card 系列和部分 Snowboard 存在负库存，建议核查是否需要补货或调整记录\n\n需要我帮你制定调拨计划或处理负库存问题吗？",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 39.46661591529846,
+    "usage": {
+      "prompt_tokens": 20234,
+      "completion_tokens": 1125,
+      "total_tokens": 21359
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "根据查询结果，我发现了一个重要情况：\n\n## 📍 仓库现状\n\n你的店铺有两个仓库：\n- **Shop location** (主仓库)\n- **My Custom Location** (自定义仓库)\n\n但 **My Custom Location 目前没有任何库存记录**，所有商品库存都集中在 Shop location。\n\n## 📊 库存差异最大的商品（Top 10）\n\n由于 My Custom Location 库存为 0，差异 = Shop location 库存数量：\n\n| 商品名称 | Shop location | My Custom Location | 差异 |\n|---------|--------------|-------------------|------|\n| The Archived Snowboard | 50 | 0 | **50** |\n| The Draft Snowboard | 20 | 0 | **20** |\n| The Collection Snowboard: Hydrogen | 16 | 0 | **16** |\n| The Minimal Snowboard | 15 | 0 | **15** |\n| The Videographer Snowboard | 11 | 0 | **11** |\n| Gift Card ($100) | -10 | 0 | **-10** |\n| Gift Card ($50) | -24 | 0 | **-24** |\n| Gift Card ($25) | -39 | 0 | **-39** |\n| Gift Card ($10) | -29 | 0 | **-29** |\n\n## 💡 建议\n\n1. **如果 My Custom Location 是新仓库**：需要从 Shop location 调拨库存过去\n2. **如果 My Custom Location 已停用**：可以考虑在系统中删除该仓库位置\n3. **负库存商品**：Gift Card 系列和部分 Snowboard 存在负库存，建议核查是否需要补货或调整记录\n\n需要我帮你制定调拨计划或处理负库存问题吗？",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  shop {\\n    locations(first: 10) {\\n      edges {\\n        node {\\n          id\\n          name\\n        }\\n      }\\n    }\\n  }\\n}\"}"
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  inventoryItems(first: 100) {\\n    edges {\\n      node {\\n        id\\n        sku\\n        variant {\\n          id\\n          title\\n          product {\\n            id\\n            titl..."
+    }
+  ]
+}

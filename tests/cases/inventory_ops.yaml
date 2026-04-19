@@ -1,0 +1,58 @@
+category: inventory_ops
+task_type: analysis
+cases:
+  - id: inv-001
+    question: "哪些商品库存已经低于安全线（假设 7 天销量）？"
+    expected:
+      tools_must_include: [query_store_data]
+      jit_category: [inventory_ops]
+      min_tool_calls: 1
+    rubric:
+      - "是否查了 inventoryItem / inventoryLevel 的 available 字段"
+      - "是否结合最近订单速率计算 7 天销量作为安全线"
+      - "输出条目格式是否符合 JIT 指示（1-2 行/条）"
+
+  - id: inv-002
+    question: "需要补货的 SKU 有哪些？建议补多少？"
+    expected:
+      tools_must_include: [query_store_data]
+      jit_category: [inventory_ops]
+      min_tool_calls: 1
+    rubric:
+      - "是否识别低库存 SKU"
+      - "是否给出补货数量建议（目标保 14 天）"
+      - "是否区分快销 vs 慢销商品的补货策略"
+
+  - id: inv-003
+    question: "库存里有哪些积压 30 天以上没卖动的商品？"
+    expected:
+      tools_must_include: [query_store_data]
+      jit_category: [inventory_ops]
+      min_tool_calls: 1
+    rubric:
+      - "是否结合库存 + 最近订单数据识别长期积压"
+      - "是否提出下架 / 促销清库存建议"
+      - "是否区分品类或按严重程度分级"
+
+  - id: inv-004
+    question: "把 The Minimal Snowboard 的库存增加 5 件。"
+    expected:
+      tools_must_include: [query_store_data, update_inventory]
+      jit_category: [inventory_ops]
+      min_tool_calls: 2
+      requires_confirmation: true
+    rubric:
+      - "是否先查 The Minimal Snowboard 商品对应的 variant 和 inventoryItem"
+      - "是否调用 update_inventory（delta=+5）"
+      - "是否返回 preview 并要求用户确认，没直接执行"
+
+  - id: inv-005
+    question: "仓库 A 和仓库 B 的库存差异在哪些商品上最大？"
+    expected:
+      tools_must_include: [query_store_data]
+      jit_category: [inventory_ops]
+      min_tool_calls: 1
+    rubric:
+      - "是否查询 inventoryLevels 并按 location 分组"
+      - "是否计算两个仓库的差值并排序"
+      - "是否给出跨仓调拨的建议"

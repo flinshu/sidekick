@@ -1,0 +1,116 @@
+{
+  "case_id": "sales-001",
+  "category": "sales_analytics",
+  "question": "上周订单数和总销售额是多少？",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "sales-001",
+    "model": "zhipu:glm-5",
+    "category": "sales_analytics",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 47.35173583030701,
+    "total_tokens": 36288,
+    "tool_calls_count": 4,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 4,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用了 query_store_data 工具，并在至少一次调用中（第二条记录）使用了 created_at 时间范围过滤（>=2026-04-06 且 <2026-04-13），覆盖了「上周」的完整自然周（周一至周日），且查询了 totalPrice 和 createdAt 字段；最终回复明确给出了订单数（0 单）和总销售额（¥0.00）两个数字，完全满足 rubric 三项要求。唯一小瑕疵是时间范围描述中写为「2026-04-06 至 2026-04-12」，但 GraphQL 查询实际用的是 <2026-04-13（即包含 12 日），属表述微瑕，不影响实质正确性，故 overall 扣1分得4分。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 5,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13 financial_status:paid\\\") {\\n    edges {\\n      node {\\n        id\\n        name\\n        totalPrice\\n        createdAt\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13\\\") {\\n    edges {\\n      node {\\n        id\\n        name\\n        totalPrice\\n        createdAt\\n        displayFinancialStatus\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  orders(first: 10, sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        name\\n        totalPrice\\n        createdAt\\n        displayFinancialStatus\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-04-01\\\") {\\n    edges {\\n      node {\\n        id\\n        name\\n        totalPrice\\n        createdAt\\n        displayFinancialStatus\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "根据查询结果，**上周（2026-04-06 至 2026-04-12）的订单数据如下：**\n\n📊 **上周订单数：0 单**  \n💰 **上周总销售额：¥0.00**\n\n---\n\n**数据说明：**\n- 查询了 2026-04-06（周一）至 2026-04-12（周日）期间的所有订单\n- 该时间段内确实没有订单记录\n- 店铺的订单数据显示，所有订单均集中在 2026-04-18（昨天）创建\n\n**可能原因：**\n1. 店铺为新开业，上周尚未开始运营\n2. 上周处于休业或测试阶段\n3. 如需查看其他时间段数据，请告诉我具体日期范围",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 47.35173583030701,
+    "usage": {
+      "prompt_tokens": 34917,
+      "completion_tokens": 1371,
+      "total_tokens": 36288
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "根据查询结果，**上周（2026-04-06 至 2026-04-12）的订单数据如下：**\n\n📊 **上周订单数：0 单**  \n💰 **上周总销售额：¥0.00**\n\n---\n\n**数据说明：**\n- 查询了 2026-04-06（周一）至 2026-04-12（周日）期间的所有订单\n- 该时间段内确实没有订单记录\n- 店铺的订单数据显示，所有订单均集中在 2026-04-18（昨天）创建\n\n**可能原因：**\n1. 店铺为新开业，上周尚未开始运营\n2. 上周处于休业或测试阶段\n3. 如需查看其他时间段数据，请告诉我具体日期范围",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13 financial_status:paid\\\") {\\n    edges {\\n      node {\\n        id\\n        name\\n        totalPrice\\n        c..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13\\\") {\\n    edges {\\n      node {\\n        id\\n        name\\n        totalPrice\\n        createdAt\\n        disp..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  orders(first: 10, sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        name\\n        totalPrice\\n        createdAt\\n        displayFinancialStatus\\n    ..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-04-01\\\") {\\n    edges {\\n      node {\\n        id\\n        name\\n        totalPrice\\n        createdAt\\n        displayFinancialStatus\\n   ..."
+    }
+  ]
+}

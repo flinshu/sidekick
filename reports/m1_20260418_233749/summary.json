@@ -1,0 +1,26 @@
+{
+  "timestamp": "20260418_233749",
+  "elapsed_s": 103.76183485984802,
+  "cases_count": 2,
+  "models": [
+    "dashscope:qwen-max"
+  ],
+  "judge_model": "dashscope/qwen-max",
+  "rubric_summary": {
+    "dashscope:qwen-max": {
+      "n": 2,
+      "hard_pass_rate": 1.0,
+      "tool_selection_accuracy": 1.0,
+      "min_tool_calls_met": 1.0,
+      "jit_category_hit": 1.0,
+      "graphql_syntax_ok": 1.0,
+      "confirmation_respected": 1.0,
+      "completed": 1.0,
+      "avg_latency_s": 51.87925601005554,
+      "avg_total_tokens": 25457.5,
+      "total_fallback_events": 0,
+      "total_validation_retries": 0
+    }
+  },
+  "judge_summary": {}
+}

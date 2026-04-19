@@ -1,0 +1,88 @@
+{
+  "case_id": "content-001",
+  "category": "content_generation",
+  "question": "帮商品 ID gid://shopify/Product/10373911838904 写一份新的商品描述，突出环保材质。",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "content-001",
+    "model": "zhipu:glm-5",
+    "category": "content_generation",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 30.072592735290527,
+    "total_tokens": 20173,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 5,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用 query_store_data 查询商品原始信息（满足'先查询'要求）；新描述中多次突出环保材质相关概念（如'零浪费'、'无纸化设计'、'减少碳排放'、'可持续'、'无运输碳足迹'），虽未出现'环保材质'字面词但语义精准覆盖且符合电商语境；严格遵循JIT指令：先返回完整预览（含SEO描述）、再请求确认；SEO描述'无纸化电子礼品卡，零碳排放即时送达。可持续礼物选择，让心意更环保。'共78字符，≤160字符。所有rubric维度均完美达成。"
+  },
+  "trace": {
+    "task_type": "content_generation",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  product(id: \\\"gid://shopify/Product/10373911838904\\\") {\\n    id\\n    title\\n    productType\\n    descriptionHtml\\n    tags\\n    seo {\\n      title\\n      description\\n    }\\n    vendor\\n    variants(first: 5) {\\n      edges {\\n        node {\\n          id\\n          title\\n          price\\n          sku\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "save_content",
+        "arguments": "{\"product_id\":\"gid://shopify/Product/10373911838904\",\"description_html\":\"<p>选择我们的电子礼品卡，送给亲友一份<strong>零浪费的绿色心意</strong>。</p>\\n<p>🌿 <strong>无纸化设计</strong>：完全数字化交付，无需印刷、无需物流包装，从源头减少碳排放。</p>\\n<p>♻️ <strong>可持续礼物</strong>：让收礼人自主选择真正需要的商品，避免闲置浪费，践行理性消费理念。</p>\\n<p>✨ <strong>即时送达</strong>：下单后即刻发送至收件人邮箱，无运输延迟，也无运输碳足迹。</p>\\n<p>适用于全场商品，无使用门槛。用一份环保的礼物，传递对人对地球的双重关爱。</p>\",\"seo_title\":\"环保电子礼品卡 | 零浪费绿色礼物\",\"seo_description\":\"无纸化电子礼品卡，零碳排放即时送达。可持续礼物选择，让心意更环保。\",\"tags\":[\"环保\", \"可持续\", \"电子礼品卡\", \"零浪费\", \"绿色礼物\"]}",
+        "ok": true,
+        "requires_confirmation": true,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1",
+      "[JIT:write_confirmation] 此操作不可撤销。在真正调用 Shopify 之前，你必须把 previ"
+    ],
+    "final_content": "## 📝 操作确认卡\n\n**商品：** Gift Card（礼品卡）\n\n| 项目 | 修改前 | 修改后 |\n|------|--------|--------|\n| **商品描述** | This is a gift card for the store | ✅ 新描述（见下方预览） |\n| **SEO 标题** | 无 | 环保电子礼品卡 \\| 零浪费绿色礼物 |\n| **SEO 描述** | 无 | 无纸化电子礼品卡，零碳排放即时送达。可持续礼物选择，让心意更环保。 |\n| **标签** | 无 | 环保、可持续、电子礼品卡、零浪费、绿色礼物 |\n\n---\n\n### 新描述预览：\n\n> 选择我们的电子礼品卡，送给亲友一份**零浪费的绿色心意**。\n> \n> 🌿 **无纸化设计**：完全数字化交付，无需印刷、无需物流包装，从源头减少碳排放。\n> \n> ♻️ **可持续礼物**：让收礼人自主选择真正需要的商品，避免闲置浪费，践行理性消费理念。\n> \n> ✨ **即时送达**：下单后即刻发送至收件人邮箱，无运输延迟，也无运输碳足迹。\n> \n> 适用于全场商品，无使用门槛。用一份环保的礼物，传递对人对地球的双重关爱。\n\n---\n\n⚠️ **此操作修改后立即对买家可见，且不可撤销。**\n\n请确认是否应用以上更改？回复 **\"确认\"** 执行，或 **\"取消\"** 放弃。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 30.072592735290527,
+    "usage": {
+      "prompt_tokens": 18837,
+      "completion_tokens": 1336,
+      "total_tokens": 20173
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "## 📝 操作确认卡\n\n**商品：** Gift Card（礼品卡）\n\n| 项目 | 修改前 | 修改后 |\n|------|--------|--------|\n| **商品描述** | This is a gift card for the store | ✅ 新描述（见下方预览） |\n| **SEO 标题** | 无 | 环保电子礼品卡 \\| 零浪费绿色礼物 |\n| **SEO 描述** | 无 | 无纸化电子礼品卡，零碳排放即时送达。可持续礼物选择，让心意更环保。 |\n| **标签** | 无 | 环保、可持续、电子礼品卡、零浪费、绿色礼物 |\n\n---\n\n### 新描述预览：\n\n> 选择我们的电子礼品卡，送给亲友一份**零浪费的绿色心意**。\n> \n> 🌿 **无纸化设计**：完全数字化交付，无需印刷、无需物流包装，从源头减少碳排放。\n> \n> ♻️ **可持续礼物**：让收礼人自主选择真正需要的商品，避免闲置浪费，践行理性消费理念。\n> \n> ✨ **即时送达**：下单后即刻发送至收件人邮箱，无运输延迟，也无运输碳足迹。\n> \n> 适用于全场商品，无使用门槛。用一份环保的礼物，传递对人对地球的双重关爱。\n\n---\n\n⚠️ **此操作修改后立即对买家可见，且不可撤销。**\n\n请确认是否应用以上更改？回复 **\"确认\"** 执行，或 **\"取消\"** 放弃。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  product(id: \\\"gid://shopify/Product/10373911838904\\\") {\\n    id\\n    title\\n    productType\\n    descriptionHtml\\n    tags\\n    seo {\\n      title\\n      description\\n    }\\n    vendor\\..."
+    },
+    {
+      "name": "save_content",
+      "ok": true,
+      "args_preview": "{\"product_id\":\"gid://shopify/Product/10373911838904\",\"description_html\":\"<p>选择我们的电子礼品卡，送给亲友一份<strong>零浪费的绿色心意</strong>。</p>\\n<p>🌿 <strong>无纸化设计</strong>：完全数字化交付，无需印刷、无需物流包装，从源头减少碳排放。</p>\\n<p>♻️ <stron..."
+    }
+  ]
+}

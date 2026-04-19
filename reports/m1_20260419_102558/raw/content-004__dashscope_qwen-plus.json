@@ -1,0 +1,88 @@
+{
+  "case_id": "content-004",
+  "category": "content_generation",
+  "question": "给这个商品加 3-5 个相关 tags 帮助店内搜索。商品：gid://shopify/Product/10373911838904。",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "content-004",
+    "model": "dashscope:qwen-plus",
+    "category": "content_generation",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 13.181055068969727,
+    "total_tokens": 18923,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 5,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": true,
+    "graphql_fields_reasonable": true,
+    "reasoning": "助手正确调用 query_store_data 查询了 product 的 title、productType、tags（验证为空），并基于商品名 'Gift Card' 合理生成 5 个语义相关、无重复的 tags；所有 tag 均覆盖品类、形式、场景维度，且数量符合 3–5 要求；save_content 调用参数与建议完全一致，操作透明可验。"
+  },
+  "trace": {
+    "task_type": "content_generation",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetProduct($id: ID!) { product(id: $id) { id title handle productType vendor tags } }\", \"variables\": {\"id\": \"gid://shopify/Product/10373911838904\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "save_content",
+        "arguments": "{\"product_id\": \"gid://shopify/Product/10373911838904\", \"tags\": [\"gift-card\", \"digital-gift\", \"e-gift-card\", \"present\", \"holiday-gift\"]}",
+        "ok": true,
+        "requires_confirmation": true,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1",
+      "[JIT:write_confirmation] 此操作不可撤销。在真正调用 Shopify 之前，你必须把 previ"
+    ],
+    "final_content": "✅ **操作确认卡**\n\n**操作**：更新商品「Gift Card」的 tags  \n**当前 tags**：`[]`（空）  \n**将添加**：`[\"gift-card\", \"digital-gift\", \"e-gift-card\", \"present\", \"holiday-gift\"]`  \n\n🔍 **为什么这些 tag？**  \n- `gift-card`：基础品类词，必选  \n- `digital-gift` / `e-gift-card`：强调电子形式，覆盖买家搜索\"数字礼品卡\"\"e gift card\"等习惯用语  \n- `present` / `holiday-gift`：拓展使用场景，提升节日/送礼相关搜索曝光  \n\n⚠️ 此操作立即生效，影响店内搜索排序。  \n\n请回复 **“确认”** 执行，或 **“取消”** 终止。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 13.181055068969727,
+    "usage": {
+      "prompt_tokens": 18462,
+      "completion_tokens": 461,
+      "total_tokens": 18923
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "✅ **操作确认卡**\n\n**操作**：更新商品「Gift Card」的 tags  \n**当前 tags**：`[]`（空）  \n**将添加**：`[\"gift-card\", \"digital-gift\", \"e-gift-card\", \"present\", \"holiday-gift\"]`  \n\n🔍 **为什么这些 tag？**  \n- `gift-card`：基础品类词，必选  \n- `digital-gift` / `e-gift-card`：强调电子形式，覆盖买家搜索\"数字礼品卡\"\"e gift card\"等习惯用语  \n- `present` / `holiday-gift`：拓展使用场景，提升节日/送礼相关搜索曝光  \n\n⚠️ 此操作立即生效，影响店内搜索排序。  \n\n请回复 **“确认”** 执行，或 **“取消”** 终止。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetProduct($id: ID!) { product(id: $id) { id title handle productType vendor tags } }\", \"variables\": {\"id\": \"gid://shopify/Product/10373911838904\"}}"
+    },
+    {
+      "name": "save_content",
+      "ok": true,
+      "args_preview": "{\"product_id\": \"gid://shopify/Product/10373911838904\", \"tags\": [\"gift-card\", \"digital-gift\", \"e-gift-card\", \"present\", \"holiday-gift\"]}"
+    }
+  ]
+}

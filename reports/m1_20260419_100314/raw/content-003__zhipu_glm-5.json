@@ -1,0 +1,90 @@
+{
+  "case_id": "content-003",
+  "category": "content_generation",
+  "question": "商品 gid://shopify/Product/{SAMPLE_PRODUCT_ID} 的描述太长了，帮我精简到 200 字以内。",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "content-003",
+    "model": "zhipu:glm-5",
+    "category": "content_generation",
+    "tool_selection_accuracy": false,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": false,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 52.35252904891968,
+    "total_tokens": 17851,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [
+      "缺失工具：['save_content']，实际调用：['query_store_data', 'query_store_data']",
+      "期望触发写操作但实际未调用任何写工具"
+    ],
+    "hard_pass": false
+  },
+  "judge": {
+    "overall": 2,
+    "tool_selection_correct": false,
+    "jit_instruction_followed": false,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "工具调用错误：首次 query_store_data 尝试使用含变量 $id 的 GraphQL 查询但失败（ok: false），未重试或修正；第二次却退化为查询最新10个商品列表，而非目标商品详情，导致无法读取原描述——违反rubric首条。未精简任何描述，故无法验证字数、卖点保留、save_content提交等后续要求。回复将占位符误判为真实ID，且未主动提取/展示目标商品原始description字段，仅列举无关商品，完全偏离任务目标。"
+  },
+  "trace": {
+    "task_type": "content_generation",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"query getProduct($id: ID!) {\\n  product(id: $id) {\\n    id\\n    title\\n    descriptionHtml\\n    description\\n    seo {\\n      title\\n      description\\n    }\\n    tags\\n    productType\\n  }\\n}\",\"variables\":{\"id\": \"gid://shopify/Product/{SAMPLE_PRODUCT_ID}\"}}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors: Variable $id of type ID! was provided invalid value"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  products(first: 10, sortKey: UPDATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        title\\n        description\\n        productType\\n        updatedAt\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1",
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1"
+    ],
+    "final_content": "我查询了你的商品列表，发现 `{SAMPLE_PRODUCT_ID}` 是一个占位符。目前店铺中有描述的商品如下：\n\n| 商品 | 当前描述 | 字数 |\n|------|----------|------|\n| **The Complete Snowboard** | This PREMIUM snowboard is so SUPERDUPER awesome! | ~40字 |\n| **Gift Card** | This is a gift card for the store | ~30字 |\n\n这两个商品的描述都很短，不需要精简。\n\n**请告诉我：**\n1. 你想精简哪个商品的描述？（请提供商品名称或完整 ID，如 `gid://shopify/Product/10373912002744`）\n2. 或者是否有其他商品我需要查看？",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 52.35252904891968,
+    "usage": {
+      "prompt_tokens": 17185,
+      "completion_tokens": 666,
+      "total_tokens": 17851
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "我查询了你的商品列表，发现 `{SAMPLE_PRODUCT_ID}` 是一个占位符。目前店铺中有描述的商品如下：\n\n| 商品 | 当前描述 | 字数 |\n|------|----------|------|\n| **The Complete Snowboard** | This PREMIUM snowboard is so SUPERDUPER awesome! | ~40字 |\n| **Gift Card** | This is a gift card for the store | ~30字 |\n\n这两个商品的描述都很短，不需要精简。\n\n**请告诉我：**\n1. 你想精简哪个商品的描述？（请提供商品名称或完整 ID，如 `gid://shopify/Product/10373912002744`）\n2. 或者是否有其他商品我需要查看？",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\":\"query getProduct($id: ID!) {\\n  product(id: $id) {\\n    id\\n    title\\n    descriptionHtml\\n    description\\n    seo {\\n      title\\n      description\\n    }\\n    tags\\n    productType\\n  }\\..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  products(first: 10, sortKey: UPDATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        title\\n        description\\n        productType\\n        updatedAt\\n      }\\n  ..."
+    }
+  ]
+}

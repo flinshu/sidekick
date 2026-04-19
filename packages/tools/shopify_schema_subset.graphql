@@ -1,0 +1,472 @@
+"""
+Sidekick POC — Shopify Admin GraphQL Schema Subset (API 2025-04)
+
+这是人工 curated 的子集，覆盖 M1 需要的 10 个核心类型。完整 schema 太大（数 MB），
+直接注入会吃掉大部分 context，所以只给 Agent 最常用的字段。
+
+按 Query 入口分组。只展示 Agent 真正会用到的字段，内嵌注释解释语义。
+"""
+
+# ==================== 根查询 ====================
+
+type QueryRoot {
+  """店铺基础信息"""
+  shop: Shop!
+
+  """按 ID 查单个商品"""
+  product(id: ID!): Product
+
+  """分页查商品列表；支持 query 参数（Shopify search syntax）"""
+  products(first: Int, after: String, query: String, sortKey: ProductSortKeys): ProductConnection!
+
+  """分页查订单；支持 query 过滤 (e.g. 'created_at:>=2024-01-01')"""
+  orders(first: Int, after: String, query: String, sortKey: OrderSortKeys, reverse: Boolean): OrderConnection!
+
+  """按 ID 查客户"""
+  customer(id: ID!): Customer
+
+  """分页查客户。sortKey 支持按总消费 / 订单数 / 最后订单日期排序（用于 Top 消费、流失客户分析等）"""
+  customers(first: Int, after: String, query: String, sortKey: CustomerSortKeys, reverse: Boolean): CustomerConnection!
+
+  """按 ID 查 Collection（商品分组）"""
+  collection(id: ID!): Collection
+
+  """分页查 Collections"""
+  collections(first: Int, after: String, query: String): CollectionConnection!
+
+  """查询某 SKU 或 variant 的库存水平"""
+  inventoryItem(id: ID!): InventoryItem
+
+  """分页查价格规则（促销的底层）"""
+  priceRules(first: Int, after: String, query: String): PriceRuleConnection!
+}
+
+# ==================== 店铺 ====================
+
+type Shop {
+  id: ID!
+  name: String!
+  email: String!
+  myshopifyDomain: String!
+  currencyCode: CurrencyCode!
+  primaryDomain: Domain!
+  ianaTimezone: String!
+}
+
+type Domain {
+  host: String!
+  url: URL!
+}
+
+# ==================== 商品 ====================
+
+type Product {
+  id: ID!
+  title: String!
+  handle: String!
+  vendor: String
+  productType: String
+  status: ProductStatus!  # ACTIVE / ARCHIVED / DRAFT
+  tags: [String!]!
+  description: String
+  descriptionHtml: HTML!
+  seo: SEO!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  totalInventory: Int
+  tracksInventory: Boolean!
+  priceRangeV2: ProductPriceRangeV2!
+  featuredImage: Image
+  variants(first: Int): ProductVariantConnection!
+  collections(first: Int): CollectionConnection!
+}
+
+type ProductConnection {
+  edges: [ProductEdge!]!
+  pageInfo: PageInfo!
+}
+
+type ProductEdge {
+  node: Product!
+  cursor: String!
+}
+
+enum ProductStatus { ACTIVE ARCHIVED DRAFT }
+
+enum ProductSortKeys {
+  TITLE PRODUCT_TYPE VENDOR UPDATED_AT CREATED_AT INVENTORY_TOTAL PUBLISHED_AT ID RELEVANCE
+}
+
+type SEO {
+  title: String
+  description: String
+}
+
+type ProductPriceRangeV2 {
+  minVariantPrice: MoneyV2!
+  maxVariantPrice: MoneyV2!
+}
+
+# ==================== 商品 Variant ====================
+
+type ProductVariant {
+  id: ID!
+  title: String!
+  sku: String
+  price: Money!
+  compareAtPrice: Money
+  inventoryQuantity: Int
+  inventoryItem: InventoryItem!
+  product: Product!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ProductVariantConnection {
+  edges: [ProductVariantEdge!]!
+  pageInfo: PageInfo!
+}
+
+type ProductVariantEdge {
+  node: ProductVariant!
+  cursor: String!
+}
+
+# ==================== 库存 ====================
+
+type InventoryItem {
+  id: ID!
+  sku: String
+  tracked: Boolean!
+  inventoryLevels(first: Int): InventoryLevelConnection!
+  variant: ProductVariant
+}
+
+type InventoryLevel {
+  id: ID!
+  available: Int  # 已废弃但仍可用
+  quantities(names: [String!]!): [InventoryQuantity!]!
+  location: Location!
+  item: InventoryItem!
+}
+
+type InventoryLevelConnection {
+  edges: [InventoryLevelEdge!]!
+  pageInfo: PageInfo!
+}
+
+type InventoryLevelEdge {
+  node: InventoryLevel!
+  cursor: String!
+}
+
+type InventoryQuantity {
+  name: String!  # 常见值：available / committed / incoming / on_hand / reserved
+  quantity: Int!
+}
+
+type Location {
+  id: ID!
+  name: String!
+}
+
+# ==================== 订单 ====================
+
+type Order {
+  id: ID!
+  name: String!  # 订单号 (#1001)
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  processedAt: DateTime
+  cancelledAt: DateTime
+  cancelReason: OrderCancelReason
+  displayFinancialStatus: OrderDisplayFinancialStatus
+  displayFulfillmentStatus: OrderDisplayFulfillmentStatus
+  currencyCode: CurrencyCode!
+  subtotalPrice: Money
+  totalPrice: Money!
+  totalDiscounts: Money
+  totalTax: Money
+  customer: Customer
+  lineItems(first: Int): LineItemConnection!
+  note: String
+  tags: [String!]!
+}
+
+type OrderConnection {
+  edges: [OrderEdge!]!
+  pageInfo: PageInfo!
+}
+
+type OrderEdge {
+  node: Order!
+  cursor: String!
+}
+
+enum OrderSortKeys { CREATED_AT UPDATED_AT PROCESSED_AT FINANCIAL_STATUS FULFILLMENT_STATUS ID TOTAL_PRICE RELEVANCE }
+enum OrderCancelReason { CUSTOMER FRAUD INVENTORY DECLINED OTHER STAFF }
+enum OrderDisplayFinancialStatus { PAID PARTIALLY_PAID PENDING REFUNDED PARTIALLY_REFUNDED VOIDED AUTHORIZED EXPIRED }
+enum OrderDisplayFulfillmentStatus { FULFILLED IN_PROGRESS OPEN PARTIALLY_FULFILLED PENDING_FULFILLMENT RESTOCKED SCHEDULED UNFULFILLED }
+
+# ==================== 订单 LineItem ====================
+
+type LineItem {
+  id: ID!
+  name: String!
+  quantity: Int!
+  sku: String
+  variant: ProductVariant
+  product: Product
+  originalTotalSet: MoneyBag!
+  discountedTotalSet: MoneyBag!
+}
+
+type LineItemConnection {
+  edges: [LineItemEdge!]!
+  pageInfo: PageInfo!
+}
+
+type LineItemEdge {
+  node: LineItem!
+  cursor: String!
+}
+
+# ==================== 客户 ====================
+
+type Customer {
+  id: ID!
+  firstName: String
+  lastName: String
+  email: String
+  phone: String
+  tags: [String!]!
+  note: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  numberOfOrders: UnsignedInt64!
+  amountSpent: MoneyV2!
+  lastOrder: Order
+}
+
+type CustomerConnection {
+  edges: [CustomerEdge!]!
+  pageInfo: PageInfo!
+}
+
+type CustomerEdge {
+  node: Customer!
+  cursor: String!
+}
+
+enum CustomerSortKeys {
+  ID NAME LOCATION ORDERS_COUNT LAST_ORDER_DATE UPDATED_AT TOTAL_SPENT RELEVANCE
+  # 注意：是 TOTAL_SPENT 不是 AMOUNT_SPENT
+}
+
+# ==================== Collection ====================
+
+type Collection {
+  id: ID!
+  title: String!
+  handle: String!
+  description: String
+  productsCount: Count!
+  products(first: Int): ProductConnection!
+  updatedAt: DateTime!
+}
+
+type CollectionConnection {
+  edges: [CollectionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type CollectionEdge {
+  node: Collection!
+  cursor: String!
+}
+
+type Count {
+  count: Int!
+}
+
+# ==================== 促销：PriceRule + DiscountCode ====================
+
+type PriceRule {
+  id: ID!
+  title: String!
+  target: PriceRuleTarget!
+  allocationMethod: PriceRuleAllocationMethod!
+  valueV2: PricingValue!
+  startsAt: DateTime!
+  endsAt: DateTime
+  status: PriceRuleStatus!
+  usageCount: Int!
+}
+
+type PriceRuleConnection {
+  edges: [PriceRuleEdge!]!
+  pageInfo: PageInfo!
+}
+
+type PriceRuleEdge {
+  node: PriceRule!
+  cursor: String!
+}
+
+enum PriceRuleTarget { LINE_ITEM SHIPPING_LINE }
+enum PriceRuleAllocationMethod { ACROSS EACH }
+enum PriceRuleStatus { ACTIVE EXPIRED SCHEDULED }
+
+union PricingValue = MoneyV2 | PricingPercentageValue
+
+type PricingPercentageValue {
+  percentage: Float!
+}
+
+type DiscountCode {
+  id: ID!
+  code: String!
+  priceRule: PriceRule!
+  usageCount: Int!
+}
+
+# ==================== 通用 ====================
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  endCursor: String
+  startCursor: String
+}
+
+type Image {
+  id: ID
+  url: URL!
+  altText: String
+}
+
+type Money { amount: Decimal! currencyCode: CurrencyCode! }
+type MoneyV2 { amount: Decimal! currencyCode: CurrencyCode! }
+type MoneyBag { shopMoney: MoneyV2! presentmentMoney: MoneyV2! }
+
+scalar URL
+scalar DateTime
+scalar HTML
+scalar Decimal
+scalar UnsignedInt64
+
+enum CurrencyCode {
+  USD EUR GBP CNY JPY CAD AUD HKD SGD  # 只列常见，实际 Shopify 支持所有 ISO 4217
+}
+
+# ==================== 常用 Mutation（Agent 通过写工具间接使用） ====================
+
+type Mutation {
+  """更新 variant 价格。Agent 通过 update_price 工具调用，不直接用。"""
+  productVariantUpdate(input: ProductVariantInput!): ProductVariantUpdatePayload
+
+  """调整库存数量。Agent 通过 update_inventory 工具调用。"""
+  inventoryAdjustQuantities(input: InventoryAdjustQuantitiesInput!): InventoryAdjustQuantitiesPayload
+
+  """更新商品（描述/SEO/tags 等）。Agent 通过 save_content 工具调用。"""
+  productUpdate(input: ProductInput!): ProductUpdatePayload
+
+  """创建价格规则。与 discountCodeCreate 组合构成促销。"""
+  priceRuleCreate(priceRule: PriceRuleInput!): PriceRuleCreatePayload
+
+  """为已有价格规则创建折扣码"""
+  discountCodeCreate(code: String!, priceRuleId: ID!): DiscountCodeCreatePayload
+}
+
+input ProductVariantInput {
+  id: ID!
+  price: Money
+  compareAtPrice: Money
+  sku: String
+}
+
+type ProductVariantUpdatePayload {
+  productVariant: ProductVariant
+  userErrors: [UserError!]!
+}
+
+input InventoryAdjustQuantitiesInput {
+  reason: String!
+  name: String!  # 如 "available"
+  changes: [InventoryChangeInput!]!
+}
+
+input InventoryChangeInput {
+  delta: Int!
+  inventoryItemId: ID!
+  locationId: ID!
+}
+
+type InventoryAdjustQuantitiesPayload {
+  inventoryAdjustmentGroup: InventoryAdjustmentGroup
+  userErrors: [UserError!]!
+}
+
+type InventoryAdjustmentGroup {
+  id: ID!
+}
+
+input ProductInput {
+  id: ID
+  title: String
+  descriptionHtml: String
+  seo: SEOInput
+  tags: [String!]
+  status: ProductStatus
+}
+
+input SEOInput {
+  title: String
+  description: String
+}
+
+type ProductUpdatePayload {
+  product: Product
+  userErrors: [UserError!]!
+}
+
+input PriceRuleInput {
+  title: String!
+  target: PriceRuleTarget!
+  allocationMethod: PriceRuleAllocationMethod!
+  valueV2: PricingValueInput!
+  startsAt: DateTime!
+  endsAt: DateTime
+  customerSelection: PriceRuleCustomerSelectionInput!
+  itemEntitlements: PriceRuleItemEntitlementsInput!
+}
+
+input PricingValueInput {
+  percentageValue: Float
+  fixedAmountValue: Decimal
+}
+
+input PriceRuleCustomerSelectionInput {
+  forAllCustomers: Boolean
+}
+
+input PriceRuleItemEntitlementsInput {
+  targetAllLineItems: Boolean
+  productIds: [ID!]
+  collectionIds: [ID!]
+}
+
+type PriceRuleCreatePayload {
+  priceRule: PriceRule
+  userErrors: [UserError!]!
+}
+
+type DiscountCodeCreatePayload {
+  discountCode: DiscountCode
+  userErrors: [UserError!]!
+}
+
+type UserError {
+  field: [String!]
+  message: String!
+}

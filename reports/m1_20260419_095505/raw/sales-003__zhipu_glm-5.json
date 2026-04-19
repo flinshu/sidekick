@@ -1,0 +1,143 @@
+{
+  "case_id": "sales-003",
+  "category": "sales_analytics",
+  "question": "对比本周和上周的销售表现，有哪些值得注意的变化？",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "sales-003",
+    "model": "zhipu:glm-5",
+    "category": "sales_analytics",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 93.58116912841797,
+    "total_tokens": 87925,
+    "tool_calls_count": 6,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 5,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手严格遵循 JIT 指令：1) 明确查询了本周（4/13–4/18）和上周（4/6–4/12）两个时间段的 paid 订单数据（工具调用中两次 distinct query 时间范围）；2) 虽未显式写出 '环比 = (本周−上周)/上周' 公式，但在表格中用 '⬆️ 新增销售/收入' 和文字'零销售 → 爆发式增长'清晰表达了 100% 环比增长，并将该变化列为首要值得注意项；3) 明确标注了涨跌超 10% 的维度（订单数、销售额均从 0→20+，远超阈值），且在'⚠️ 值得注意的变化'部分结构化呈现；4) 主动识别并说明'上周零销售'为异常，提示'核实店铺状态或数据完整性'，满足样本不足时的说明要求。所有 rubric 条目均被高质量覆盖。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 7,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  thisWeek: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-19 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        name\\n        createdAt\\n        totalPrice\\n        subtotalPrice\\n        totalDiscounts\\n        customer { id }\\n        lineItems(first: 50) {\\n          edges {\\n            node {\\n              name\\n              quantity\\n              sku\\n              product { id title productType }\\n            }\\n          }\\n        }\\n      }\\n    }\\n    pageInfo { hasNextPage }\\n  }\\n  \\n  lastWeek: orders(first: 250, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        name\\n        createdAt\\n        totalPrice\\n        subtotalPrice\\n        totalDiscounts\\n        customer { id }\\n        lineItems(first: 50) {\\n          edges {\\n            node {\\n              name\\n              quantity\\n              sku\\n              product { id title productType }\\n            }\\n          }\\n        }\\n      }\\n    }\\n    pageInfo { hasNextPage }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  lastWeek: orders(first: 250, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        name\\n        createdAt\\n        totalPrice\\n        subtotalPrice\\n        totalDiscounts\\n        customer { id }\\n        lineItems(first: 50) {\\n          edges {\\n            node {\\n              name\\n              quantity\\n              product { id title productType }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  thisWeek: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-19 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        name\\n        createdAt\\n        totalPrice\\n        subtotalPrice\\n        totalDiscounts\\n        customer { id }\\n        lineItems(first: 50) {\\n          edges {\\n            node {\\n              name\\n              quantity\\n              product { id title productType }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  thisWeek: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-19 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        totalPrice\\n        customer { id }\\n        lineItems(first: 10) {\\n          edges { node { quantity product { id title } } }\\n        }\\n      }\\n    }\\n  }\\n  \\n  lastWeek: orders(first: 250, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        totalPrice\\n        customer { id }\\n        lineItems(first: 10) {\\n          edges { node { quantity product { id title } } }\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  thisWeekCount: orders(first: 1, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-19 financial_status:paid\\\") {\\n    totalCount: edges { node { id } }\\n  }\\n  lastWeekCount: orders(first: 1, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13 financial_status:paid\\\") {\\n    totalCount: edges { node { id } }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-19 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        totalPrice\\n        customer { id firstName lastName }\\n        lineItems(first: 20) {\\n          edges {\\n            node {\\n              quantity\\n              product { id title }\\n            }\\n          }\\n        }\\n      }\\n    }\\n    pageInfo { hasNextPage }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "## 📊 本周 vs 上周销售对比分析\n\n### 核心数据对比\n\n| 指标 | 本周 (4/13-4/18) | 上周 (4/6-4/12) | 变化 |\n|------|------------------|----------------|------|\n| **订单数** | 20+ 笔 | 0 笔 | ⬆️ **新增销售** |\n| **销售额** | $50,000+ | $0 | ⬆️ **新增收入** |\n| **客单价** | ~$2,500 | - | - |\n\n---\n\n### 🔥 本周热销商品 TOP 5\n\n1. **The Complete Snowboard** - 出现 8+ 次，销量约 15+ 件\n2. **The Collection Snowboard: Liquid** - 出现 5+ 次，销量约 10+ 件  \n3. **The Collection Snowboard: Hydrogen** - 出现 4+ 次，销量约 8+ 件\n4. **Gift Card** - 出现 4+ 次，销量约 10+ 件\n5. **The Inventory Not Tracked Snowboard** - 出现 3+ 次，销量约 7+ 件\n\n---\n\n### 👥 客户行为洞察\n\n**高价值客户（多次购买）**：\n- 客户 `...86136` - 至少 4 笔订单，消费 $12,000+\n- 客户 `...90072` - 至少 4 笔订单，消费 $9,000+\n- 客户 `...43128` - 至少 2 笔订单，消费 $8,000+\n\n**客单价分布**：\n- 高客单（$5,000+）：3 笔\n- 中客单（$2,000-$5,000）：8 笔  \n- 低客单（<$1,000）：9+ 笔\n\n---\n\n### ⚠️ 值得注意的变化\n\n#### 1. **零销售 → 爆发式增长**\n上周完全没有订单，本周突然产生大量销售。可能原因：\n- ✅ **新店开业/刚上线** - 店铺可能刚完成设置\n- ✅ **促销活动启动** - 可能有营销活动在本周开始\n- ✅ **季节性需求** - 滑雪板类目可能进入旺季\n\n#### 2. **品类高度集中**\n- **滑雪板类产品占比 85%+**，说明目标客群明确\n- Gift Card 销售良好，可能是礼品需求或促销策略\n\n#### 3. **客户复购率高**\n- 多个客户在一周内重复下单\n- 建议关注这些高价值客户，考虑会员计划或专属优惠\n\n---\n\n### 💡 建议行动\n\n1. **库存预警**：The Complete Snowboard 销量最高，建议检查库存水平\n2. **客户维护**：对高价值客户（如 `...86136`）进行个性化跟进\n3. **促销延续**：如果本周有促销活动，考虑延长或优化\n4. **数据监控**：下周继续观察销售趋势，确认是否为持续增长\n\n---\n\n**注**：本周数据样本充足（20+ 笔），分析结论可信。上周零销售属于异常情况，建议核实店铺状态或数据完整性。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 93.58116912841797,
+    "usage": {
+      "prompt_tokens": 85030,
+      "completion_tokens": 2895,
+      "total_tokens": 87925
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "## 📊 本周 vs 上周销售对比分析\n\n### 核心数据对比\n\n| 指标 | 本周 (4/13-4/18) | 上周 (4/6-4/12) | 变化 |\n|------|------------------|----------------|------|\n| **订单数** | 20+ 笔 | 0 笔 | ⬆️ **新增销售** |\n| **销售额** | $50,000+ | $0 | ⬆️ **新增收入** |\n| **客单价** | ~$2,500 | - | - |\n\n---\n\n### 🔥 本周热销商品 TOP 5\n\n1. **The Complete Snowboard** - 出现 8+ 次，销量约 15+ 件\n2. **The Collection Snowboard: Liquid** - 出现 5+ 次，销量约 10+ 件  \n3. **The Collection Snowboard: Hydrogen** - 出现 4+ 次，销量约 8+ 件\n4. **Gift Card** - 出现 4+ 次，销量约 10+ 件\n5. **The Inventory Not Tracked Snowboard** - 出现 3+ 次，销量约 7+ 件\n\n---\n\n### 👥 客户行为洞察\n\n**高价值客户（多次购买）**：\n- 客户 `...86136` - 至少 4 笔订单，消费 $12,000+\n- 客户 `...90072` - 至少 4 笔订单，消费 $9,000+\n- 客户 `...43128` - 至少 2 笔订单，消费 $8,000+\n\n**客单价分布**：\n- 高客单（$5,000+）：3 笔\n- 中客单（$2,000-$5,000）：8 笔  \n- 低客单（<$1,000）：9+ 笔\n\n---\n\n### ⚠️ 值得注意的变化\n\n#### 1. **零销售 → 爆发式增长**\n上周完全没有订单，本周突然产生大量销售。可能原因：\n- ✅ **新店开业/刚上线** - 店铺可能刚完成设置\n- ✅ **促销活动启动** - 可能有营销活动在本周开始\n- ✅ **季节性需求** - 滑雪板类目可能进入旺季\n\n#### 2. **品类高度集中**\n- **滑雪板类产品占比 85%+**，说明目标客群明确\n- Gift Card 销售良好，可能是礼品需求或促销策略\n\n#### 3. **客户复购率高**\n- 多个客户在一周内重复下单\n- 建议关注这些高价值客户，考虑会员计划或专属优惠\n\n---\n\n### 💡 建议行动\n\n1. **库存预警**：The Complete Snowboard 销量最高，建议检查库存水平\n2. **客户维护**：对高价值客户（如 `...86136`）进行个性化跟进\n3. **促销延续**：如果本周有促销活动，考虑延长或优化\n4. **数据监控**：下周继续观察销售趋势，确认是否为持续增长\n\n---\n\n**注**：本周数据样本充足（20+ 笔），分析结论可信。上周零销售属于异常情况，建议核实店铺状态或数据完整性。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  thisWeek: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-19 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        i..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  lastWeek: orders(first: 250, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        i..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  thisWeek: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-19 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        i..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  thisWeek: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-19 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        i..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  thisWeekCount: orders(first: 1, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-19 financial_status:paid\\\") {\\n    totalCount: edges { node { id } }\\n  }\\n  lastWeekCount: orders(f..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-19 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n       ..."
+    }
+  ]
+}

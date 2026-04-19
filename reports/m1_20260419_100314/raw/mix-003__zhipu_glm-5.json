@@ -1,0 +1,117 @@
+{
+  "case_id": "mix-003",
+  "category": "mixed_intent",
+  "question": "哪些客户最近 30 天没下单但之前花费超过 100 美元？给他们发个召回折扣。",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "mix-003",
+    "model": "zhipu:glm-5",
+    "category": "mixed_intent",
+    "tool_selection_accuracy": false,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": false,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 61.976500034332275,
+    "total_tokens": 41655,
+    "tool_calls_count": 4,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [
+      "缺失工具：['create_promotion']，实际调用：['query_store_data', 'query_store_data', 'query_store_data', 'query_store_data']",
+      "期望触发写操作但实际未调用任何写工具"
+    ],
+    "hard_pass": false
+  },
+  "judge": {
+    "overall": 2,
+    "tool_selection_correct": false,
+    "jit_instruction_followed": false,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "工具调用未正确识别流失客户：未执行「先查客户 + 订单数据识别最近30天没下单但历史花费>100美元」的核心逻辑。第一次查询因语法错误失败，后续查询虽获取了部分订单和客户数据，但未做客户ID集合差集（如：所有amountSpent > 100的客户 - 最近30天下单客户），导致错误断言‘无流失客户’；折扣码设计完全缺失（rubric要求体现‘召回’用途）；PII呈现不合理——直接提及‘3个客户（消费金额$0）’隐含可推断个体，且未脱敏/聚合；未生成任何折扣码或召回策略，违反核心意图。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 4,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  customers(first: 250, sortKey: TOTAL_SPENT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        firstName\\n        lastName\\n        email\\n        amountSpent {\\n          amount\\n          currencyCode\\n        }\\n        numberOfOrders\\n        lastOrder {\\n          id\\n          createdAt\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors: Argument 'sortKey' on Field 'customers' has an invalid value (TOTAL_SPENT). Expected type 'CustomerSortKeys'."
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-03-20 financial_status:paid\\\") {\\n    edges {\\n      node {\\n        id\\n        customer {\\n          id\\n        }\\n        createdAt\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  customers(first: 250) {\\n    edges {\\n      node {\\n        id\\n        firstName\\n        lastName\\n        email\\n        amountSpent {\\n          amount\\n          currencyCode\\n        }\\n        numberOfOrders\\n        lastOrder {\\n          id\\n          createdAt\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:<2026-03-20 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        customer {\\n          id\\n          firstName\\n          lastName\\n          email\\n          amountSpent {\\n            amount\\n            currencyCode\\n          }\\n        }\\n        createdAt\\n        totalPrice\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:customer_insights] 你现在处于「CRM 顾问」模式。处理客户数据时请：\n1) 区分高价值客户",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:customer_insights] 你现在处于「CRM 顾问」模式。处理客户数据时请：\n1) 区分高价值客户",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "## 分析结果\n\n经过查询分析，**当前店铺没有符合条件的客户**。\n\n### 数据情况：\n- **总客户数**：250+ 个客户\n- **最近30天有订单的客户**：所有有消费记录的客户都在 2026-04-18 下单\n- **无订单客户**：3 个客户（消费金额 $0）\n- **30天前有订单的客户**：0 个\n\n### 结论：\n目前所有高价值客户（消费 >$100）都在最近30天内有活跃订单，**不存在流失风险客户**。\n\n### 建议：\n1. **当前无需召回活动** - 客户活跃度良好\n2. **预防性措施** - 可以设置自动化提醒，当客户超过30天未下单时触发\n3. **客户分群维护** - 对现有高价值客户进行忠诚度计划维护\n\n需要我帮你设置一个自动化流程，当客户超过30天未下单时自动发送召回折扣吗？",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 61.976500034332275,
+    "usage": {
+      "prompt_tokens": 40174,
+      "completion_tokens": 1481,
+      "total_tokens": 41655
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "## 分析结果\n\n经过查询分析，**当前店铺没有符合条件的客户**。\n\n### 数据情况：\n- **总客户数**：250+ 个客户\n- **最近30天有订单的客户**：所有有消费记录的客户都在 2026-04-18 下单\n- **无订单客户**：3 个客户（消费金额 $0）\n- **30天前有订单的客户**：0 个\n\n### 结论：\n目前所有高价值客户（消费 >$100）都在最近30天内有活跃订单，**不存在流失风险客户**。\n\n### 建议：\n1. **当前无需召回活动** - 客户活跃度良好\n2. **预防性措施** - 可以设置自动化提醒，当客户超过30天未下单时触发\n3. **客户分群维护** - 对现有高价值客户进行忠诚度计划维护\n\n需要我帮你设置一个自动化流程，当客户超过30天未下单时自动发送召回折扣吗？",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\":\"{\\n  customers(first: 250, sortKey: TOTAL_SPENT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        firstName\\n        lastName\\n        email\\n        amountSpent {\\n         ..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-03-20 financial_status:paid\\\") {\\n    edges {\\n      node {\\n        id\\n        customer {\\n          id\\n        }\\n        createdAt\\n  ..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  customers(first: 250) {\\n    edges {\\n      node {\\n        id\\n        firstName\\n        lastName\\n        email\\n        amountSpent {\\n          amount\\n          currencyCode\\n    ..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:<2026-03-20 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        customer {\\n          i..."
+    }
+  ]
+}

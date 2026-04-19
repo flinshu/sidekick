@@ -1,0 +1,89 @@
+{
+  "case_id": "inv-003",
+  "category": "inventory_ops",
+  "question": "库存里有哪些积压 30 天以上没卖动的商品？",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "inv-003",
+    "model": "dashscope:qwen-plus",
+    "category": "inventory_ops",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": false,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 49.479443311691284,
+    "total_tokens": 30131,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [
+      "JIT 场景未命中期望：['inventory_ops']，实际：['[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\\n1) 计算关键聚合（环比、', '[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\\n1) SEO 描述控制在 1']"
+    ],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 3,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确结合库存（totalInventory > 0）与销售数据（近30天无销量）识别积压，且通过 createdAt 时间戳严谨验证了'上架超30天'条件，逻辑严密；但未提出任何下架或促销清库存建议（rubric第二条完全缺失）；虽指出'全部今日上架'并提示业务现实，但未按rubric第三条对品类或严重程度分级（所有商品同属snowboard品类，却未按库存量、负库存等维度分层）。结论合理，但行动建议偏离rubric核心要求。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetRecentSoldProductIds($first: Int!, $query: String!) { orders(first: $first, query: $query) { edges { node { id lineItems(first: 10) { edges { node { product { id } } } } } } } }\", \"variables\": {\"first\": 250, \"query\": \"financial_status:paid created_at:>=2026-03-19 created_at:<2026-04-19\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetActiveProducts($first: Int!, $query: String!) { products(first: $first, query: $query) { edges { node { id title handle vendor productType tags totalInventory createdAt updatedAt variants(first: 1) { edges { node { sku } } } } cursor } pageInfo { hasNextPage endCursor } } }\", \"variables\": {\"first\": 50, \"query\": \"status:active\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1"
+    ],
+    "final_content": "我们已获取首批 50 款 active 商品（共 50 条，`hasNextPage: false` → 全部商品仅此 50 个）。\n\n🔍 **交叉比对结果（积压商品识别）**：\n- 近 30 天有销量的商品 ID（22 个）：已知如 `10373911838904`（Gift Card）、`10373911806136`（Ski Wax）等；\n- 当前全部 active 商品共 50 个，ID 均已列出；\n- ✅ **真正「积压 30 天以上」的商品 = 同时满足**：\n  - `createdAt < 2026-03-19`（上架超 30 天）  \n  - `totalInventory > 0`（有库存可售）  \n  - **且不在上述 22 个热销 ID 中**\n\n逐条检查后，发现以下 **6 款商品完全符合积压定义**：\n\n| 商品标题 | SKU（首个 variant） | 上架时间 | 当前库存 | 备注 |\n|----------|---------------------|----------|----------|------|\n| The Videographer Snowboard | — | 2026-04-18 | 11 | ❌ 上架仅 0 天 → **排除**（太新） |\n| The Minimal Snowboard | — | 2026-04-18 | 15 | ❌ 同上 → 排除 |\n| The Collection Snowboard: Hydrogen | — | 2026-04-18 | 16 | ❌ 排除 |\n| The Hidden Snowboard | — | 2026-04-18 | 27 | ❌ 排除 |\n| The Multi-location Snowboard | — | 2026-04-18 | 85 | ❌ 排除 |\n| The Multi-managed Snowboard | `sku-managed-1` | 2026-04-18 | 48 | ❌ 排除 |\n| The 3p Fulfilled Snowboard | `sku-hosted-1` | 2026-04-18 | -6 | ❌ 库存为负（超卖），非积压 |\n| The Collection Snowboard: Oxygen | — | 2026-04-18 | 29 | ❌ 排除 |\n| The Collection Snowboard: Liquid | — | 2026-04-18 | 13 | ❌ 排除 |\n\n⚠️ **关键发现**：所有 50 款 active 商品的 `createdAt` 全部是 **`2026-04-18T14:51:03Z` 或 `...04Z`** —— 即 **全部于今天（2026-04-18）上架**。  \n→ 因此，**严格意义上，当前店铺没有任何一款商品上架满 30 天**，自然也不存在「积压 30 天以上没卖动」的商品。\n\n✅ **但注意业务现实**：这些商品很可能是测试数据（批量导入的 demo 商品），真实店铺中应有历史商品。  \n若你确认这是真实环境，请检查是否：\n- 商品被误设为 `draft` 或 `archived`（我们的查询只含 `status:active`）；  \n- 或需扩大时间范围（如查「上架超 30 天 *且* 近 30 天零销量」——但当前无老商品，无法满足）。\n\n📌 **结论**：  \n**当前无积压商品** —— 所有在售商品均为今日上架，尚未经历完整销售周期。建议：  \n- 若为新店，可等待 1–2 周后再分析；  \n- 若为旧店但数据异常，建议检查商品状态或同步设置。\n\n需要我帮你：  \n🔹 查看 `draft` 或 `archived` 商品中是否有老款？  \n🔹 分析「近 7 天零销量但库存 > 0」的商品（更实用的滞销预警）？  \n🔹 为其中某款生成优化后的 SEO 描述/标签以提升曝光？  \n\n请告诉我下一步 👇",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 49.479443311691284,
+    "usage": {
+      "prompt_tokens": 28115,
+      "completion_tokens": 2016,
+      "total_tokens": 30131
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "我们已获取首批 50 款 active 商品（共 50 条，`hasNextPage: false` → 全部商品仅此 50 个）。\n\n🔍 **交叉比对结果（积压商品识别）**：\n- 近 30 天有销量的商品 ID（22 个）：已知如 `10373911838904`（Gift Card）、`10373911806136`（Ski Wax）等；\n- 当前全部 active 商品共 50 个，ID 均已列出；\n- ✅ **真正「积压 30 天以上」的商品 = 同时满足**：\n  - `createdAt < 2026-03-19`（上架超 30 天）  \n  - `totalInventory > 0`（有库存可售）  \n  - **且不在上述 22 个热销 ID 中**\n\n逐条检查后，发现以下 **6 款商品完全符合积压定义**：\n\n| 商品标题 | SKU（首个 variant） | 上架时间 | 当前库存 | 备注 |\n|----------|---------------------|----------|----------|------|\n| The Videographer Snowboard | — | 2026-04-18 | 11 | ❌ 上架仅 0 天 → **排除**（太新） |\n| The Minimal Snowboard | — | 2026-04-18 | 15 | ❌ 同上 → 排除 |\n| The Collection Snowboard: Hydrogen | — | 2026-04-18 | 16 | ❌ 排除 |\n| The Hidden Snowboard | — | 2026-04-18 | 27 | ❌ 排除 |\n| The Multi-location Snowboard | — | 2026-04-18 | 85 | ❌ 排除 |\n| The Multi-managed Snowboard | `sku-managed-1` | 2026-04-18 | 48 | ❌ 排除 |\n| The 3p Fulfilled Snowboard | `sku-hosted-1` | 2026-04-18 | -6 | ❌ 库存为负（超卖），非积压 |\n| The Collection Snowboard: Oxygen | — | 2026-04-18 | 29 | ❌ 排除 |\n| The Collection Snowboard: Liquid | — | 2026-04-18 | 13 | ❌ 排除 |\n\n⚠️ **关键发现**：所有 50 款 active 商品的 `createdAt` 全部是 **`2026-04-18T14:51:03Z` 或 `...04Z`** —— 即 **全部于今天（2026-04-18）上架**。  \n→ 因此，**严格意义上，当前店铺没有任何一款商品上架满 30 天**，自然也不存在「积压 30 天以上没卖动」的商品。\n\n✅ **但注意业务现实**：这些商品很可能是测试数据（批量导入的 demo 商品），真实店铺中应有历史商品。  \n若你确认这是真实环境，请检查是否：\n- 商品被误设为 `draft` 或 `archived`（我们的查询只含 `status:active`）；  \n- 或需扩大时间范围（如查「上架超 30 天 *且* 近 30 天零销量」——但当前无老商品，无法满足）。\n\n📌 **结论**：  \n**当前无积压商品** —— 所有在售商品均为今日上架，尚未经历完整销售周期。建议：  \n- 若为新店，可等待 1–2 周后再分析；  \n- 若为旧店但数据异常，建议检查商品状态或同步设置。\n\n需要我帮你：  \n🔹 查看 `draft` 或 `archived` 商品中是否有老款？  \n🔹 分析「近 7 天零销量但库存 > 0」的商品（更实用的滞销预警）？  \n🔹 为其中某款生成优化后的 SEO 描述/标签以提升曝光？  \n\n请告诉我下一步 👇",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetRecentSoldProductIds($first: Int!, $query: String!) { orders(first: $first, query: $query) { edges { node { id lineItems(first: 10) { edges { node { product { id } } } } } } } }\", ..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetActiveProducts($first: Int!, $query: String!) { products(first: $first, query: $query) { edges { node { id title handle vendor productType tags totalInventory createdAt updatedAt v..."
+    }
+  ]
+}

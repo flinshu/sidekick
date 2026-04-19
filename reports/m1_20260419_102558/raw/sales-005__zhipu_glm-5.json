@@ -1,0 +1,88 @@
+{
+  "case_id": "sales-005",
+  "category": "sales_analytics",
+  "question": "最近 7 天退款或取消的订单有哪些？可能什么原因？",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "sales-005",
+    "model": "zhipu:glm-5",
+    "category": "sales_analytics",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 44.526849031448364,
+    "total_tokens": 22118,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 5,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用两次 query_store_data：一次查 financial_status:refunded（覆盖退款），一次查未限定 cancelReason 的 cancelledOrders（覆盖取消，隐含 cancelledAt 非空）；虽未显式过滤 cancelledAt 字段，但 Shopify API 中 orders 查询带 created_at 范围 + 默认返回已取消订单即等价于按 cancelledAt 过滤；回复未堆砌原始订单列表，而是归纳为‘0 笔’并从商品质量、描述准确性、客户决策等维度分析原因；同时结合订单状态（UNFULFILLED）和数据标签（seeded-by-sidekick-poc）给出合理归因，完全满足 rubric 三项要求。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  refundedOrders: orders(first: 50, query: \\\"financial_status:refunded created_at:>=2026-04-12\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        name\\n        createdAt\\n        cancelledAt\\n        cancelReason\\n        displayFinancialStatus\\n        totalPrice\\n        customer {\\n          id\\n          firstName\\n          lastName\\n          email\\n        }\\n        lineItems(first: 10) {\\n          edges {\\n            node {\\n              name\\n              quantity\\n              sku\\n            }\\n          }\\n        }\\n        note\\n        tags\\n      }\\n    }\\n  }\\n  partiallyRefundedOrders: orders(first: 50, query: \\\"financial_status:partially_refunded created_at:>=2026-04-12\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        name\\n        createdAt\\n        cancelledAt\\n        cancelReason\\n        displayFinancialStatus\\n        totalPrice\\n        customer {\\n          id\\n          firstName\\n          lastName\\n          email\\n        }\\n        lineItems(first: 10) {\\n          edges {\\n            node {\\n              name\\n              quantity\\n              sku\\n            }\\n          }\\n        }\\n        note\\n        tags\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  cancelledOrders: orders(first: 50, query: \\\"created_at:>=2026-04-12\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        name\\n        createdAt\\n        cancelledAt\\n        cancelReason\\n        displayFinancialStatus\\n        displayFulfillmentStatus\\n        totalPrice\\n        customer {\\n          id\\n          firstName\\n          lastName\\n          email\\n        }\\n        lineItems(first: 10) {\\n          edges {\\n            node {\\n              name\\n              quantity\\n              sku\\n            }\\n          }\\n        }\\n        note\\n        tags\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "## 查询结果\n\n**最近 7 天（2026-04-12 至 2026-04-19）没有退款或取消的订单。**\n\n我查询了：\n- ✅ 全额退款订单：0 笔\n- ✅ 部分退款订单：0 笔  \n- ✅ 已取消订单：0 笔\n\n最近7天的所有订单状态均为 **PAID（已支付）** 且 **UNFULFILLED（未发货）**，没有出现退款或取消情况。\n\n---\n\n## 可能原因分析\n\n**积极信号：**\n1. **产品质量良好** - 无退货退款，说明商品符合客户预期\n2. **描述准确** - 商品页面描述与实物一致，减少\"货不对板\"投诉\n3. **客户决策明确** - 购买前已充分了解商品，冲动消费少\n\n**需关注的点：**\n1. **订单均为未发货状态** - 所有订单都还没发货，退款通常发生在发货后或发货前客户反悔。建议关注发货后的退款率变化\n2. **样本时间较短** - 7天数据可能不足以反映长期趋势，建议持续监控\n3. **测试环境数据** - 所有订单都带有 `seeded-by-sidekick-poc` 标签，可能是测试数据，实际生产环境可能不同\n\n---\n\n**建议：**\n- 持续监控发货后的退款率（通常发货后 7-14 天是退款高峰期）\n- 如需查看更长时间段（如近30天）的退款情况，我可以帮你扩展查询范围",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 44.526849031448364,
+    "usage": {
+      "prompt_tokens": 20794,
+      "completion_tokens": 1324,
+      "total_tokens": 22118
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "## 查询结果\n\n**最近 7 天（2026-04-12 至 2026-04-19）没有退款或取消的订单。**\n\n我查询了：\n- ✅ 全额退款订单：0 笔\n- ✅ 部分退款订单：0 笔  \n- ✅ 已取消订单：0 笔\n\n最近7天的所有订单状态均为 **PAID（已支付）** 且 **UNFULFILLED（未发货）**，没有出现退款或取消情况。\n\n---\n\n## 可能原因分析\n\n**积极信号：**\n1. **产品质量良好** - 无退货退款，说明商品符合客户预期\n2. **描述准确** - 商品页面描述与实物一致，减少\"货不对板\"投诉\n3. **客户决策明确** - 购买前已充分了解商品，冲动消费少\n\n**需关注的点：**\n1. **订单均为未发货状态** - 所有订单都还没发货，退款通常发生在发货后或发货前客户反悔。建议关注发货后的退款率变化\n2. **样本时间较短** - 7天数据可能不足以反映长期趋势，建议持续监控\n3. **测试环境数据** - 所有订单都带有 `seeded-by-sidekick-poc` 标签，可能是测试数据，实际生产环境可能不同\n\n---\n\n**建议：**\n- 持续监控发货后的退款率（通常发货后 7-14 天是退款高峰期）\n- 如需查看更长时间段（如近30天）的退款情况，我可以帮你扩展查询范围",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  refundedOrders: orders(first: 50, query: \\\"financial_status:refunded created_at:>=2026-04-12\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        nam..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  cancelledOrders: orders(first: 50, query: \\\"created_at:>=2026-04-12\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        name\\n        createdAt\\n   ..."
+    }
+  ]
+}

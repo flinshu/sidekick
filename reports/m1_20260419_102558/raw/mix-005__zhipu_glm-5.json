@@ -1,0 +1,116 @@
+{
+  "case_id": "mix-005",
+  "category": "mixed_intent",
+  "question": "帮我看看 T 恤类目这周的销售表现，如果销量低于 10 件就启动 8 折促销。",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "mix-005",
+    "model": "zhipu:glm-5",
+    "category": "mixed_intent",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 53.375625133514404,
+    "total_tokens": 44738,
+    "tool_calls_count": 4,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 3,
+    "tool_selection_correct": false,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手未按 rubric 要求查询 orders + lineItems 关联 T 恤类目销量（缺失订单与商品的关联分析），仅查询了 products 和泛化 orders，未统计 T 恤实际销量；因此无法判断是否 <10 件，也未执行条件触发逻辑（既未说‘无需促销’，也未调用 create_promotion）；虽体现了 JIT 的谨慎确认意图（提供选项），但核心判断环节完全缺失，违反‘条件触发’和‘阈值判断’两条关键 rubric。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 5,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-04-13 financial_status:paid\\\") {\\n    edges {\\n      node {\\n        id\\n        name\\n        createdAt\\n        totalPrice\\n        lineItems(first: 50) {\\n          edges {\\n            node {\\n              quantity\\n              product {\\n                id\\n                title\\n                productType\\n              }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  products(first: 50, query: \\\"product_type:T-shirt OR product_type:tshirt OR product_type:t-shirt\\\") {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        status\\n        totalInventory\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  products(first: 50, query: \\\"title:T-shirt OR title:tshirt OR title:T恤\\\") {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        status\\n        totalInventory\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  products(first: 100) {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        status\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:content_creator] 你现在处于「内容创作者」模式。生成内容请遵循：\n1) SEO 描述控制在 1"
+    ],
+    "final_content": "## 📊 分析结果\n\n**店铺没有 T 恤类目商品。**\n\n我查看了你店铺的所有商品，当前类目分布如下：\n\n| 类目 | 商品数 | 状态 |\n|------|--------|------|\n| snowboard（滑雪板） | 13 件 | 主要类目 |\n| accessories（配件） | 1 件 | Ski Wax |\n| giftcard（礼品卡） | 1 件 | - |\n\n---\n\n**这周实际销售表现（4/13 - 4/19）：**\n\n| 类目 | 销量 | 销售额 |\n|------|------|--------|\n| snowboard | 约 35 件 | $35,000+ |\n| accessories | 13 件 | $324.70 |\n| giftcard | 6 件 | $1,334.85 |\n\n---\n\n**请问你是想：**\n1. 查看 **snowboard 类目**的销售表现并设置促销？\n2. 为某个**具体商品**创建 8 折促销？\n3. 还是你计划上架 T 恤新品，需要提前准备促销方案？",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 53.375625133514404,
+    "usage": {
+      "prompt_tokens": 43516,
+      "completion_tokens": 1222,
+      "total_tokens": 44738
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "## 📊 分析结果\n\n**店铺没有 T 恤类目商品。**\n\n我查看了你店铺的所有商品，当前类目分布如下：\n\n| 类目 | 商品数 | 状态 |\n|------|--------|------|\n| snowboard（滑雪板） | 13 件 | 主要类目 |\n| accessories（配件） | 1 件 | Ski Wax |\n| giftcard（礼品卡） | 1 件 | - |\n\n---\n\n**这周实际销售表现（4/13 - 4/19）：**\n\n| 类目 | 销量 | 销售额 |\n|------|------|--------|\n| snowboard | 约 35 件 | $35,000+ |\n| accessories | 13 件 | $324.70 |\n| giftcard | 6 件 | $1,334.85 |\n\n---\n\n**请问你是想：**\n1. 查看 **snowboard 类目**的销售表现并设置促销？\n2. 为某个**具体商品**创建 8 折促销？\n3. 还是你计划上架 T 恤新品，需要提前准备促销方案？",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  orders(first: 250, query: \\\"created_at:>=2026-04-13 financial_status:paid\\\") {\\n    edges {\\n      node {\\n        id\\n        name\\n        createdAt\\n        totalPrice\\n        lineI..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  products(first: 50, query: \\\"product_type:T-shirt OR product_type:tshirt OR product_type:t-shirt\\\") {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n       ..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  products(first: 50, query: \\\"title:T-shirt OR title:tshirt OR title:T恤\\\") {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        status\\n        totalInve..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  products(first: 100) {\\n    edges {\\n      node {\\n        id\\n        title\\n        productType\\n        status\\n      }\\n    }\\n  }\\n}\"}"
+    }
+  ]
+}

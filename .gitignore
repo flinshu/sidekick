@@ -1,0 +1,79 @@
+# ====== Python ======
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.egg-info/
+.tox/
+build/
+dist/
+pip-wheel-metadata/
+
+# uv
+.uv-cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# ====== Node / JavaScript ======
+node_modules/
+.pnpm-store/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+.npmrc.local
+
+# ====== Env / Secrets ======
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets/
+
+# ====== IDE / OS ======
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# ====== Logs / Reports ======
+logs/
+*.log
+reports/raw/
+reports/cache/
+.cache/
+
+# ====== Data / Artifacts ======
+data/local/
+data/sample/
+*.sqlite
+*.db
+qdrant_storage/
+postgres_data/
+redis_data/
+langfuse_data/
+
+# ====== Docker ======
+.docker/
+docker-data/
+
+# ====== Build outputs ======
+*.tar.gz
+*.zip
+
+# ====== Claude Code 本地状态 ======
+.claude/

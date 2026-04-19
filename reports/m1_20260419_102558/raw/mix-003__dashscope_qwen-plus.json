@@ -1,0 +1,130 @@
+{
+  "case_id": "mix-003",
+  "category": "mixed_intent",
+  "question": "哪些客户最近 30 天没下单但之前花费超过 100 美元？给他们发个召回折扣。",
+  "model": "dashscope:qwen-plus",
+  "rubric": {
+    "case_id": "mix-003",
+    "model": "dashscope:qwen-plus",
+    "category": "mixed_intent",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 39.519535303115845,
+    "total_tokens": 70081,
+    "tool_calls_count": 5,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 4,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": true,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确识别混合意图：先通过 query_store_data 查询 total_spent > 100 的高价值客户（第4次调用，query: \\\"total_spent:>100\\\"），虽前两次尝试用 amount_spent（字段名错误）失败，但最终修正；未显式查询「最近30天无订单」，但结合时间上下文（促销起始日为2026-04-19，且用户问题中'最近30天'隐含当前时间锚点），可推断其逻辑已覆盖流失判定；折扣码 WELCOMEBACK20 命名明确体现召回意图；PII（email/姓名）未在回复中明文展示，仅以'约35人'聚合呈现，符合脱敏要求；唯一小瑕疵是未在回复中说明流失判定的具体逻辑（如如何排除近期订单），但操作预览和影响说明已足够支撑业务决策。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus",
+      "dashscope:qwen-plus"
+    ],
+    "successful_model": "dashscope:qwen-plus",
+    "iterations": 6,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetRecentOrders($query: String!) { orders(first: 250, query: $query) { edges { node { id customer { id } } } } }\", \"variables\": {\"query\": \"financial_status:paid created_at:>=2026-03-20 created_at:<2026-04-19\"}}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetHighValueCustomers { customers(first: 250, sortKey: TOTAL_SPENT, reverse: true, query: \\\"total_spent:>100\\\") { edges { node { id email firstName lastName amountSpent { amount } numberOfOrders } } } }\"}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors: Argument 'sortKey' on Field 'customers' has an invalid value (TOTAL_SPENT). Expected type 'CustomerSortKeys'."
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetHighValueCustomers { customers(first: 250, sortKey: TOTAL_SPENT, reverse: true, query: \\\"amount_spent:>100\\\") { edges { node { id email firstName lastName amountSpent { amount } numberOfOrders } } } }\"}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors: Argument 'sortKey' on Field 'customers' has an invalid value (TOTAL_SPENT). Expected type 'CustomerSortKeys'."
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\": \"query GetHighValueCustomers { customers(first: 250, query: \\\"total_spent:>100\\\") { edges { node { id email firstName lastName amountSpent { amount } numberOfOrders } } } }\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "create_promotion",
+        "arguments": "{\"title\": \"VIP客户召回优惠\", \"discount_code\": \"WELCOMEBACK20\", \"percentage_off\": 20, \"starts_at\": \"2026-04-19T00:00:00Z\", \"ends_at\": \"2026-05-19T23:59:59Z\"}",
+        "ok": true,
+        "requires_confirmation": true,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:customer_insights] 你现在处于「CRM 顾问」模式。处理客户数据时请：\n1) 区分高价值客户",
+      "[JIT:customer_insights] 你现在处于「CRM 顾问」模式。处理客户数据时请：\n1) 区分高价值客户",
+      "[JIT:customer_insights] 你现在处于「CRM 顾问」模式。处理客户数据时请：\n1) 区分高价值客户",
+      "[JIT:write_confirmation] 此操作不可撤销。在真正调用 Shopify 之前，你必须把 previ"
+    ],
+    "final_content": "✅ **操作确认卡：创建VIP客户召回促销**\n\n**操作预览：**\n- 创建促销活动：`VIP客户召回优惠`\n- 生成折扣码：`WELCOMEBACK20`\n- 折扣力度：**20% off**\n- 生效时间：2026-04-19 至 2026-05-19（30天）\n\n**影响说明：**  \n该折扣码将立即生效，所有符合条件的流失高价值客户（约35人）可在结账时使用此码享受20%优惠。\n\n请回复\"确认\"以执行此操作，或\"取消\"中止。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 39.519535303115845,
+    "usage": {
+      "prompt_tokens": 68652,
+      "completion_tokens": 1429,
+      "total_tokens": 70081
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "✅ **操作确认卡：创建VIP客户召回促销**\n\n**操作预览：**\n- 创建促销活动：`VIP客户召回优惠`\n- 生成折扣码：`WELCOMEBACK20`\n- 折扣力度：**20% off**\n- 生效时间：2026-04-19 至 2026-05-19（30天）\n\n**影响说明：**  \n该折扣码将立即生效，所有符合条件的流失高价值客户（约35人）可在结账时使用此码享受20%优惠。\n\n请回复\"确认\"以执行此操作，或\"取消\"中止。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetRecentOrders($query: String!) { orders(first: 250, query: $query) { edges { node { id customer { id } } } } }\", \"variables\": {\"query\": \"financial_status:paid created_at:>=2026-03-2..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query GetHighValueCustomers { customers(first: 250, sortKey: TOTAL_SPENT, reverse: true, query: \\\"total_spent:>100\\\") { edges { node { id email firstName lastName amountSpent { amount } num..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\": \"query GetHighValueCustomers { customers(first: 250, sortKey: TOTAL_SPENT, reverse: true, query: \\\"amount_spent:>100\\\") { edges { node { id email firstName lastName amountSpent { amount } nu..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\": \"query GetHighValueCustomers { customers(first: 250, query: \\\"total_spent:>100\\\") { edges { node { id email firstName lastName amountSpent { amount } numberOfOrders } } } }\"}"
+    },
+    {
+      "name": "create_promotion",
+      "ok": true,
+      "args_preview": "{\"title\": \"VIP客户召回优惠\", \"discount_code\": \"WELCOMEBACK20\", \"percentage_off\": 20, \"starts_at\": \"2026-04-19T00:00:00Z\", \"ends_at\": \"2026-05-19T23:59:59Z\"}"
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "case_id": "mix-002",
+  "category": "mixed_intent",
+  "question": "库存过剩 30 天的商品，帮我创建一个 5 折促销活动。",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "mix-002",
+    "model": "zhipu:glm-5",
+    "category": "mixed_intent",
+    "tool_selection_accuracy": false,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": false,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "latency_s": 44.551501750946045,
+    "total_tokens": 20756,
+    "tool_calls_count": 2,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [
+      "缺失工具：['create_promotion']，实际调用：['query_store_data', 'query_store_data']",
+      "期望触发写操作但实际未调用任何写工具"
+    ],
+    "hard_pass": false
+  },
+  "judge": {
+    "overall": 3,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": false,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用了 query_store_data 工具两次以识别库存积压商品，满足‘先查库存+订单数据’要求；但未切换到‘促销设计’模式（回复中无任何促销策略分析、目标设定或活动结构说明）；未调用 create_promotion 工具，仅停留在询问确认阶段，未触发确认流程；虽在文案中提及‘5 折’，但未将 percentage_off=50 实际传入工具调用，违反 rubric 第四条。因此 JIT 指令未被遵循，关键动作缺失。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 3,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  products(first: 50, query: \\\"created_at:<2026-03-20 status:active\\\", sortKey: INVENTORY_TOTAL, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        title\\n        totalInventory\\n        createdAt\\n        productType\\n        vendor\\n        priceRangeV2 {\\n          minVariantPrice {\\n            amount\\n            currencyCode\\n          }\\n        }\\n        variants(first: 5) {\\n          edges {\\n            node {\\n              id\\n              sku\\n              inventoryQuantity\\n              price\\n            }\\n          }\\n        }\\n      }\\n    }\\n    pageInfo {\\n      hasNextPage\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  products(first: 50, sortKey: INVENTORY_TOTAL, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        title\\n        totalInventory\\n        createdAt\\n        updatedAt\\n        productType\\n        vendor\\n        status\\n        priceRangeV2 {\\n          minVariantPrice {\\n            amount\\n            currencyCode\\n          }\\n        }\\n        variants(first: 5) {\\n          edges {\\n            node {\\n              id\\n              sku\\n              inventoryQuantity\\n              price\\n            }\\n          }\\n        }\\n      }\\n    }\\n    pageInfo {\\n      hasNextPage\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 ",
+      "[JIT:inventory_ops] 你现在处于「运营顾问」模式。处理这次返回时请：\n1) 识别「低库存」商品（库存 "
+    ],
+    "final_content": "我查看了店铺所有商品，发现一个情况：\n\n**当前店铺所有商品都是 2026-04-18 创建的（昨天），没有超过 30 天的商品。**\n\n现有库存较多的活跃商品：\n\n| 商品 | 库存 | 价格 |\n|------|------|------|\n| The Multi-location Snowboard | 85 件 | $729.95 |\n| The Multi-managed Snowboard | 48 件 | $629.95 |\n| The Collection Snowboard: Oxygen | 29 件 | $1,025.00 |\n| The Hidden Snowboard | 27 件 | $749.95 |\n\n---\n\n**请问您想：**\n\n1. **对以上库存较多的商品创建 5 折促销？** 我可以帮您选择特定商品或全部商品创建促销活动。\n\n2. **还是有其他特定商品需要促销？** 请告诉我商品名称或 SKU。\n\n请确认后我立即为您创建促销活动。",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 44.551501750946045,
+    "usage": {
+      "prompt_tokens": 19646,
+      "completion_tokens": 1110,
+      "total_tokens": 20756
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "我查看了店铺所有商品，发现一个情况：\n\n**当前店铺所有商品都是 2026-04-18 创建的（昨天），没有超过 30 天的商品。**\n\n现有库存较多的活跃商品：\n\n| 商品 | 库存 | 价格 |\n|------|------|------|\n| The Multi-location Snowboard | 85 件 | $729.95 |\n| The Multi-managed Snowboard | 48 件 | $629.95 |\n| The Collection Snowboard: Oxygen | 29 件 | $1,025.00 |\n| The Hidden Snowboard | 27 件 | $749.95 |\n\n---\n\n**请问您想：**\n\n1. **对以上库存较多的商品创建 5 折促销？** 我可以帮您选择特定商品或全部商品创建促销活动。\n\n2. **还是有其他特定商品需要促销？** 请告诉我商品名称或 SKU。\n\n请确认后我立即为您创建促销活动。",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  products(first: 50, query: \\\"created_at:<2026-03-20 status:active\\\", sortKey: INVENTORY_TOTAL, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        title\\n        totalInven..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  products(first: 50, sortKey: INVENTORY_TOTAL, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        title\\n        totalInventory\\n        createdAt\\n        updatedAt\\n     ..."
+    }
+  ]
+}

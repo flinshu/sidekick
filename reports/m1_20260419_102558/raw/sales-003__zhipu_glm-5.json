@@ -1,0 +1,228 @@
+{
+  "case_id": "sales-003",
+  "category": "sales_analytics",
+  "question": "对比本周和上周的销售表现，有哪些值得注意的变化？",
+  "model": "zhipu:glm-5",
+  "rubric": {
+    "case_id": "sales-003",
+    "model": "zhipu:glm-5",
+    "category": "sales_analytics",
+    "tool_selection_accuracy": true,
+    "min_tool_calls_met": true,
+    "jit_category_hit": true,
+    "requires_confirmation_respected": true,
+    "graphql_syntax_ok": true,
+    "completed": true,
+    "rational_refusal": false,
+    "latency_s": 122.21161603927612,
+    "total_tokens": 264228,
+    "tool_calls_count": 12,
+    "fallback_count": 0,
+    "validation_retries": 0,
+    "notes": [],
+    "hard_pass": true
+  },
+  "judge": {
+    "overall": 3,
+    "tool_selection_correct": true,
+    "jit_instruction_followed": false,
+    "graphql_syntax_valid": null,
+    "graphql_fields_reasonable": null,
+    "reasoning": "助手正确调用了两次 query_store_data 分别获取本周和上周的 paid 订单（满足‘查两个时间段’）；但未计算环比百分比（如订单数/销售额的 % 变化），仅用‘0 → 250+’定性描述，违反 rubric 第二条；未标注‘涨跌超 10% 的维度’——所有指标变化均远超 10%，但未按 JIT 指令显式标注（如加粗‘⬆️ +∞%’或注明‘涨幅 >10%’）；虽指出 API 分页限制，但未说明‘上周数据是否真实为 0’或‘样本不足是否影响统计可靠性’，未满足第四条。"
+  },
+  "trace": {
+    "task_type": "analysis",
+    "attempted_models": [
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5",
+      "zhipu:glm-5"
+    ],
+    "successful_model": "zhipu:glm-5",
+    "iterations": 13,
+    "tool_calls": [
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  thisWeek: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        name\\n        createdAt\\n        totalPrice\\n        subtotalPrice\\n        totalDiscounts\\n        customer { id }\\n        lineItems(first: 50) {\\n          edges {\\n            node {\\n              name\\n              quantity\\n              sku\\n              product { id title productType }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n  lastWeek: orders(first: 250, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        name\\n        createdAt\\n        totalPrice\\n        subtotalPrice\\n        totalDiscounts\\n        customer { id }\\n        lineItems(first: 50) {\\n          edges {\\n            node {\\n              name\\n              quantity\\n              sku\\n              product { id title productType }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  lastWeek: orders(first: 250, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        name\\n        createdAt\\n        totalPrice\\n        subtotalPrice\\n        totalDiscounts\\n        customer { id }\\n        lineItems(first: 50) {\\n          edges {\\n            node {\\n              name\\n              quantity\\n              sku\\n              product { id title productType }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  thisWeek: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        name\\n        createdAt\\n        totalPrice\\n        subtotalPrice\\n        totalDiscounts\\n        customer { id }\\n        lineItems(first: 50) {\\n          edges {\\n            node {\\n              name\\n              quantity\\n              sku\\n              product { id title productType }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  thisWeek: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\", sortKey: CREATED_AT) {\\n    edges {\\n      node {\\n        id\\n        totalPrice\\n        createdAt\\n        customer { id }\\n      }\\n    }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  thisWeekCount: orders(first: 1, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\") {\\n    totalCount\\n  }\\n  lastWeekCount: orders(first: 1, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13 financial_status:paid\\\") {\\n    totalCount\\n  }\\n}\"}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors: Field 'totalCount' doesn't exist on type 'OrderConnection' | Field 'totalCount' doesn't exist on type 'OrderConnection'"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  thisWeek: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\", sortKey: CREATED_AT) {\\n    edges {\\n      node {\\n        id\\n        totalPrice\\n        createdAt\\n        customer { id }\\n        lineItems(first: 10) {\\n          edges {\\n            node {\\n              name\\n              quantity\\n              product { id title productType }\\n            }\\n          }\\n        }\\n      }\\n    }\\n    pageInfo { hasNextPage }\\n  }\\n  lastWeek: orders(first: 250, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13 financial_status:paid\\\", sortKey: CREATED_AT) {\\n    edges {\\n      node {\\n        id\\n        totalPrice\\n        createdAt\\n        customer { id }\\n        lineItems(first: 10) {\\n          edges {\\n            node {\\n              name\\n              quantity\\n              product { id title productType }\\n            }\\n          }\\n        }\\n      }\\n    }\\n    pageInfo { hasNextPage }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  thisWeek: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\", sortKey: CREATED_AT) {\\n    edges {\\n      node {\\n        id\\n        totalPrice\\n        createdAt\\n        customer { id }\\n      }\\n    }\\n    pageInfo { hasNextPage endCursor }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  lastWeek: orders(first: 250, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13 financial_status:paid\\\", sortKey: CREATED_AT) {\\n    edges {\\n      node {\\n        id\\n        totalPrice\\n        createdAt\\n        customer { id }\\n      }\\n    }\\n    pageInfo { hasNextPage }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  page1: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\", sortKey: CREATED_AT) {\\n    edges {\\n      node {\\n        id\\n        totalPrice\\n        createdAt\\n        customer { id }\\n      }\\n    }\\n    pageInfo { hasNextPage endCursor }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  page2: orders(first: 250, after: \\\"gid://shopify/Order/6706127536312\\\", query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        totalPrice\\n        createdAt\\n        customer { id }\\n      }\\n    }\\n    pageInfo { hasNextPage }\\n  }\\n}\"}",
+        "ok": false,
+        "requires_confirmation": false,
+        "error": "Shopify GraphQL errors: Malformed cursor"
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  thisWeek: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\", sortKey: CREATED_AT) {\\n    edges {\\n      node {\\n        id\\n        totalPrice\\n        createdAt\\n        customer { id }\\n      }\\n      cursor\\n    }\\n    pageInfo { hasNextPage endCursor }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      },
+      {
+        "name": "query_store_data",
+        "arguments": "{\"query\":\"{\\n  page2: orders(first: 250, after: \\\"eyJsYXN0X2lkIjo2NzA2MTI3NTM2MzEyLCJsYXN0X3ZhbHVlIjoiMjAyNi0wNC0xOCAxNjowNToxNi4wMjQ1MzUifQ==\\\", query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        id\\n        totalPrice\\n        createdAt\\n        customer { id }\\n      }\\n    }\\n    pageInfo { hasNextPage }\\n  }\\n}\"}",
+        "ok": true,
+        "requires_confirmation": false,
+        "error": null
+      }
+    ],
+    "jit_instructions_seen": [
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、",
+      "[JIT:analytics_sales] 你现在处于「数据分析师」模式。处理这次返回时请：\n1) 计算关键聚合（环比、"
+    ],
+    "final_content": "## 📊 本周 vs 上周销售对比分析\n\n### 核心数据对比\n\n| 指标 | 本周 (4/13-4/19) | 上周 (4/6-4/12) | 变化 |\n|------|------------------|-----------------|------|\n| **订单数** | **250+** | **0** | ⬆️ **新增销售** |\n| **销售额** | **$500,000+** | **$0** | ⬆️ **新增销售** |\n| **客单价** | **~$2,000** | - | - |\n\n---\n\n### 🔍 关键发现\n\n**1. 上周零销售 → 本周爆发式增长**\n- 上周（4/6-4/12）完全没有已支付订单\n- 本周（4/13-4/19）订单量超过250单，销售额超50万美元\n- **这是非常显著的业务启动或恢复信号**\n\n**2. 客单价较高（~$2,000）**\n- 平均订单金额约$2,000，属于高客单价商品\n- 主要商品为滑雪板等运动装备\n\n**3. 订单集中在单日（4/18）**\n- 所有订单都集中在4月18日\n- 可能是促销活动、新品发布或系统数据导入\n\n---\n\n### 💡 可能原因分析\n\n1. **新店开业/业务启动**：上周无订单，本周突然爆发\n2. **促销活动**：4/18可能有大型促销或营销活动\n3. **数据迁移**：可能是历史数据批量导入\n4. **季节性因素**：滑雪装备在特定季节需求旺盛\n\n---\n\n### ⚠️ 数据说明\n- 本周订单数超过250单（API分页限制），实际数量可能更多\n- 建议查看具体促销活动或营销投放情况\n\n需要我进一步分析具体商品表现、客户构成或促销效果吗？",
+    "fallback_events": [],
+    "validation_retries": 0,
+    "error": null,
+    "latency_s": 122.21161603927612,
+    "usage": {
+      "prompt_tokens": 261048,
+      "completion_tokens": 3180,
+      "total_tokens": 264228
+    },
+    "completed": true,
+    "hit_max_iterations": false
+  },
+  "final_content": "## 📊 本周 vs 上周销售对比分析\n\n### 核心数据对比\n\n| 指标 | 本周 (4/13-4/19) | 上周 (4/6-4/12) | 变化 |\n|------|------------------|-----------------|------|\n| **订单数** | **250+** | **0** | ⬆️ **新增销售** |\n| **销售额** | **$500,000+** | **$0** | ⬆️ **新增销售** |\n| **客单价** | **~$2,000** | - | - |\n\n---\n\n### 🔍 关键发现\n\n**1. 上周零销售 → 本周爆发式增长**\n- 上周（4/6-4/12）完全没有已支付订单\n- 本周（4/13-4/19）订单量超过250单，销售额超50万美元\n- **这是非常显著的业务启动或恢复信号**\n\n**2. 客单价较高（~$2,000）**\n- 平均订单金额约$2,000，属于高客单价商品\n- 主要商品为滑雪板等运动装备\n\n**3. 订单集中在单日（4/18）**\n- 所有订单都集中在4月18日\n- 可能是促销活动、新品发布或系统数据导入\n\n---\n\n### 💡 可能原因分析\n\n1. **新店开业/业务启动**：上周无订单，本周突然爆发\n2. **促销活动**：4/18可能有大型促销或营销活动\n3. **数据迁移**：可能是历史数据批量导入\n4. **季节性因素**：滑雪装备在特定季节需求旺盛\n\n---\n\n### ⚠️ 数据说明\n- 本周订单数超过250单（API分页限制），实际数量可能更多\n- 建议查看具体促销活动或营销投放情况\n\n需要我进一步分析具体商品表现、客户构成或促销效果吗？",
+  "tool_calls_summary": [
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  thisWeek: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        i..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  lastWeek: orders(first: 250, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        i..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  thisWeek: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\", sortKey: CREATED_AT, reverse: true) {\\n    edges {\\n      node {\\n        i..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  thisWeek: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\", sortKey: CREATED_AT) {\\n    edges {\\n      node {\\n        id\\n        tota..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\":\"{\\n  thisWeekCount: orders(first: 1, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\") {\\n    totalCount\\n  }\\n  lastWeekCount: orders(first: 1, query: \\\"creat..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  thisWeek: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\", sortKey: CREATED_AT) {\\n    edges {\\n      node {\\n        id\\n        tota..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  thisWeek: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\", sortKey: CREATED_AT) {\\n    edges {\\n      node {\\n        id\\n        tota..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  lastWeek: orders(first: 250, query: \\\"created_at:>=2026-04-06 created_at:<2026-04-13 financial_status:paid\\\", sortKey: CREATED_AT) {\\n    edges {\\n      node {\\n        id\\n        tota..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  page1: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\", sortKey: CREATED_AT) {\\n    edges {\\n      node {\\n        id\\n        totalPr..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": false,
+      "args_preview": "{\"query\":\"{\\n  page2: orders(first: 250, after: \\\"gid://shopify/Order/6706127536312\\\", query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\", sortKey: CREATED_AT, reverse: tr..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  thisWeek: orders(first: 250, query: \\\"created_at:>=2026-04-13 created_at:<2026-04-20 financial_status:paid\\\", sortKey: CREATED_AT) {\\n    edges {\\n      node {\\n        id\\n        tota..."
+    },
+    {
+      "name": "query_store_data",
+      "ok": true,
+      "args_preview": "{\"query\":\"{\\n  page2: orders(first: 250, after: \\\"eyJsYXN0X2lkIjo2NzA2MTI3NTM2MzEyLCJsYXN0X3ZhbHVlIjoiMjAyNi0wNC0xOCAxNjowNToxNi4wMjQ1MzUifQ==\\\", query: \\\"created_at:>=2026-04-13 created_at:<2026-04-2..."
+    }
+  ]
+}

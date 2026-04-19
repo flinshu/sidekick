@@ -1,0 +1,41 @@
+# LLM 路由配置：按 task_type 映射到首选 + 备用模型
+#
+# 当前配置：POC 起步期只配了 DashScope（千问）一家 API。
+# 所有 task_type 都先走 Qwen-Max，fallback 到 Qwen-Turbo（更便宜 + 更快）。
+# 等后面补了 Anthropic / OpenAI key，把下面这份配置换成多 provider 版本即可（参见 llm_router.multi.yaml.example）。
+
+default_task_type: analysis
+
+routes:
+  analysis:
+    primary: dashscope:qwen-plus
+    fallbacks:
+      - zhipu:glm-5
+
+  content_generation:
+    primary: dashscope:qwen-plus
+    fallbacks:
+      - zhipu:glm-5
+
+  intent:
+    primary: dashscope:qwen-plus
+    fallbacks:
+      - zhipu:glm-5
+
+  chinese_merchant:
+    primary: dashscope:qwen-plus
+    fallbacks:
+      - zhipu:glm-5
+
+  strategy:
+    primary: dashscope:qwen-plus
+    fallbacks:
+      - zhipu:glm-5
+
+generation:
+  max_tokens: 4096
+  temperature: 0.3
+
+agent:
+  max_iterations: 8
+  max_retries_per_call: 3

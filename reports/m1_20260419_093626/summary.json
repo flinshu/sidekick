@@ -1,0 +1,34 @@
+{
+  "timestamp": "20260419_093626",
+  "elapsed_s": 58.26242399215698,
+  "cases_count": 2,
+  "models": [
+    "dashscope:qwen-plus"
+  ],
+  "judge_model": "dashscope/qwen-plus",
+  "rubric_summary": {
+    "dashscope:qwen-plus": {
+      "n": 2,
+      "hard_pass_rate": 0.5,
+      "tool_selection_accuracy": 1.0,
+      "min_tool_calls_met": 1.0,
+      "jit_category_hit": 1.0,
+      "graphql_syntax_ok": 0.5,
+      "confirmation_respected": 1.0,
+      "completed": 0.5,
+      "avg_latency_s": 27.002344012260437,
+      "avg_total_tokens": 43477.0,
+      "total_fallback_events": 1,
+      "total_validation_retries": 0
+    }
+  },
+  "judge_summary": {
+    "dashscope:qwen-plus": {
+      "n": 1,
+      "avg_overall": 3.0,
+      "tool_selection_correct_rate": 1.0,
+      "jit_instruction_followed_rate": 0.0,
+      "graphql_syntax_valid_rate": 0.0
+    }
+  }
+}
