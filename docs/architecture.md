@@ -379,7 +379,7 @@ Web 自动 follow-up："已确认。请用上一条工具返回的 confirmation_
 docker compose -f infra/docker-compose.yml up -d
 
 # 2. 环境变量
-cp .env.example .env && $EDITOR .env   # 填 Shopify token + 模型 key
+cp .env.example .env && $EDITOR .env   # 填 Shopify token + DASHSCOPE_API_KEY（+ 国内必备 HF_ENDPOINT=https://hf-mirror.com）
 
 # 3. Python 依赖
 uv sync --all-packages

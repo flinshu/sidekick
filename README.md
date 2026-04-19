@@ -2,7 +2,7 @@
 
 电商智能助手（类 Shopify Sidekick）的可行性验证项目。
 
-**当前状态**：✅ M1 + M2 + M3 已完成（OpenSpec ~70/77 任务）。
+**当前状态**：✅ M1 + M2 + M3 已完成（OpenSpec 77/79 任务，剩 12.4 GO/NO-GO + 12.5 archive）。15 个浏览器 E2E + 40 个单测全通过。
 - [🏛 架构设计](docs/architecture.md)：整体架构图 + 技术栈 + 数据流 + 安全边界
 - [📋 M1 报告](docs/m1_final_report.md)：双 provider 都通过决策门
 - [📋 M3 终报](docs/m3_final_report.md)：方案 A 7 个核心假设全部实证
@@ -127,19 +127,22 @@ uv run python -m sidekick_evals.sim_runner \
 1. 登录 https://partners.shopify.com
 2. 新建 Development Store（免费，无限制）
 3. 在 store 后台 → Apps → Develop apps → Create an app
-4. 配置 Admin API access scopes：`read_products` `write_products` `read_orders` `read_inventory` `write_inventory` `read_price_rules` `write_price_rules` `read_discounts` `write_discounts`
+4. 配置 Admin API access scopes：`read_products` `write_products` `read_orders` `read_inventory` `write_inventory` `read_locations` `read_discounts` `write_discounts` `write_draft_orders`
 5. Install app → 复制 Admin API access token
 6. 填入 `.env` 的 `SHOPIFY_ADMIN_TOKEN` 和 `SHOPIFY_SHOP_DOMAIN`
 
 ### 2. 模型 API Key
 
-至少配置一个：
+当前 `config/llm_router.yaml` 实际用的是双 provider 互为 fallback：
 
-| 变量 | 说明 |
-|------|------|
-| `ANTHROPIC_API_KEY` | Claude Sonnet/Opus/Haiku（推荐 M1 首选） |
-| `OPENAI_API_KEY` | GPT-4o / 4o-mini |
-| `DASHSCOPE_API_KEY` | 阿里百炼 Qwen-Max / Qwen-Turbo |
+| 变量 | 说明 | 是否必需 |
+|------|------|:---:|
+| `DASHSCOPE_API_KEY` | 阿里百炼（qwen-plus，**主模型**）| ✅ 必需 |
+| `ZHIPU_API_KEY` | 智谱（glm-5，fallback）| 推荐 |
+| `ANTHROPIC_API_KEY` | Claude（当前未启用，M3 留作生产期验证）| 可选 |
+| `OPENAI_API_KEY` | GPT-4o（当前未启用）| 可选 |
+
+国内网络请在 `.env` 里设 `HF_ENDPOINT=https://hf-mirror.com`，否则 semantic cache 的 embedder（sentence-transformers）无法从 HuggingFace 下载。
 
 ### 3. Dev Store 灌测试数据
 
